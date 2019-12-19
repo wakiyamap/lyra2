@@ -1,0 +1,13 @@
+[package]
+name = "rust-lyra2"
+version = "0.1.0"
+authors = ["wakiyamap <wakiyamap@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+sha3 = "0.8.2"
+blake-hash = "0.3.2"
+byteorder = "1.2"
+bytes = "0.5.3"
