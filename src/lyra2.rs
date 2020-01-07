@@ -183,31 +183,43 @@ fn absorbBlockBlake2Safe(mut s: [u64; 16], inWholeMatrix: Vec<u64>) -> [u64; 16]
  * @param state     The current state of the sponge
  * @param rowOut    Row to receive the data squeezed
  */
-fn reducedSqueezeRow0(mut state: [u64; 16], rowOut: Vec<u64>, nCols: u64) {
+fn reducedSqueezeRow0(mut state: [u64; 16], mut rowOut: Vec<u64>, nCols: u64) -> [u64; 16]{
 	let mut ptr = (nCols - 1) * BLOCKLENINT64;
+	let mut ptrWord = rowOut;
 	//M[row][C-1-col] = H.reduced_squeeze()
 	for _i in 0..nCols {
-		//let (_, mut _right) = &rowOut.split_at(ptr);
-		//ptrWord = _right as usize; //In Lyra2: pointer to M[0][C-1]
-//		ptrWord[0] = state[0];
-//		ptrWord[1] = state[1];
-//		ptrWord[2] = state[2];
-//		ptrWord[3] = state[3];
-//		ptrWord[4] = state[4];
-//		ptrWord[5] = state[5];
-//		ptrWord[6] = state[6];
-//		ptrWord[7] = state[7];
-//		ptrWord[8] = state[8];
-//		ptrWord[9] = state[9];
-//		ptrWord[10] = state[10];
-//		ptrWord[11] = state[11];
+		//let (_, mut _right) = &rowOut.split_at(ptr as usize);
+		//let mut ptrWord: Vec<u64> = _right.to_vec(); //In Lyra2: pointer to M[0][C-1]
+		ptrWord[ptr as usize] = state[0];
+		ptrWord[(ptr+1) as usize] = state[1];
+		ptrWord[(ptr+2) as usize] = state[2];
+		ptrWord[(ptr+3) as usize] = state[3];
+		ptrWord[(ptr+4) as usize] = state[4];
+		ptrWord[(ptr+5) as usize] = state[5];
+		ptrWord[(ptr+6) as usize] = state[6];
+		ptrWord[(ptr+7) as usize] = state[7];
+		ptrWord[(ptr+8) as usize] = state[8];
+		ptrWord[(ptr+9) as usize] = state[9];
+		ptrWord[(ptr+10) as usize] = state[10];
+		ptrWord[(ptr+11) as usize] = state[11];
 
 		//Goes to next block (column) that will receive the squeezed data
-		//ptr -= BLOCKLENINT64;
+		ptr = ptr.wrapping_sub(BLOCKLENINT64);
 
 		//Applies the reduced-round transformation f to the sponge's state
 		state = reducedBlake2bLyra(state);
 	}
+	return state;
+}
+
+fn cloneMem(mut copyToMem: Vec<u64>, originMem: &Vec<u64>) -> Vec<u64> {
+	let mut _i : usize = 0;
+	let memRange = copyToMem.len() - originMem.len();
+	let originMemLen = originMem.len();
+	for _i in 0..originMemLen {
+		copyToMem[_i + memRange] = originMem[_i];
+	}
+	return copyToMem;
 }
 
 // lyra2 Executes Lyra2 based on the G function from Blake2b. This version supports salts and passwords
@@ -230,13 +242,13 @@ fn reducedSqueezeRow0(mut state: [u64; 16], rowOut: Vec<u64>, nCols: u64) {
 fn lyra2(k: Vec<u8>, pwd: Vec<u8>, salt: Vec<u8>, timeCost: u64, nRows: u64, nCols: u64) {
 
 	//============================= Basic variables ============================//
-	let mut row: i32 = 2;              //index of row to be processed
-	let mut prev: i32 = 1;             //index of prev (last row ever computed/modified)
-	let mut rowa: u64;       //index of row* (a previous row, deterministically picked during Setup and randomly picked while Wandering)
-	let mut tau: u64;        //Time Loop iterator
+	let mut row: u64 = 2;              //index of row to be processed
+	let mut prev: u64 = 1;             //index of prev (last row ever computed/modified)
+	let mut rowa: u64 = 0;       //index of row* (a previous row, deterministically picked during Setup and randomly picked while Wandering)
+	let mut tau: u64 = 1;        //Time Loop iterator
 	let mut step: i32 = 1;             //Visitation step (used during Setup and Wandering phases)
 	let mut window: u64 = 2; //Visitation window (used to define which rows can be revisited during Setup)
-	let mut gap: u64 = 1;    //Modifier to the step, assuming the values 1 or -1
+	let mut gap: i32 = 1;    //Modifier to the step, assuming the values 1 or -1
 	let mut i: i32;             //auxiliary iteration counter
 	//==========================================================================/
 
@@ -259,25 +271,6 @@ fn lyra2(k: Vec<u8>, pwd: Vec<u8>, salt: Vec<u8>, timeCost: u64, nRows: u64, nCo
 		ptrWord += rowLenInt64 as usize;
 	}
 
-//	let mut rowLenInt64: u64 = BLOCKLENINT64 * nCols;
-//	//rowLenBytes := rowLenInt64 * 8
-//
-//	let mut i : u64 = nRows * rowLenInt64;
-//	let mut wholeMatrix: Vec<u64> = Vec::new();
-//	wholeMatrix.resize(i as usize, 0);
-//	//Allocates pointers to each row of the matrix
-//	let mut memMatrix: Vec<Vec<u64>> = Vec::new();
-//	memMatrix.resize(nRows as usize, &Vec::new());
-//
-//	//Places the pointers in the correct positions
-//	let mut ptrWord = 0;
-//	let mut _i : usize = 0;
-//	for _i in 0..nRows as usize {
-//		memMatrix[_i] = &wholeMatrix[..ptrWord];
-//		ptrWord += rowLenInt64 as usize;
-//		println!("s0: {:?}", &wholeMatrix[..ptrWord]);
-//	}
-	println!("s1: {:?}", memMatrix);
 	//==========================================================================/
 
 	//============= Getting the password + salt + basil padded with 10*1 ===============//
@@ -294,7 +287,7 @@ fn lyra2(k: Vec<u8>, pwd: Vec<u8>, salt: Vec<u8>, timeCost: u64, nRows: u64, nCo
 		let (_, mut _right) = &pwd.split_at(8*_j);
 		wholeMatrix[ptrByte as usize +_j] = LittleEndian::read_u64(_right);
 	}
-	println!("s1: {:?}", memMatrix);
+
 	ptrByte += pwd.len() as u64 / 8;
 
 	//Concatenates the salt
@@ -303,7 +296,7 @@ fn lyra2(k: Vec<u8>, pwd: Vec<u8>, salt: Vec<u8>, timeCost: u64, nRows: u64, nCo
 		let (_, mut _right) = &pwd.split_at(8*_j);
 		wholeMatrix[ptrByte as usize +_j] = LittleEndian::read_u64(_right);
 	}
-	println!("s1: {:?}", memMatrix);
+
 	ptrByte += salt.len() as u64 / 8;
 
 	//Concatenates the basil: every integer passed as parameter, in the order they are provided by the interface
@@ -342,15 +335,258 @@ fn lyra2(k: Vec<u8>, pwd: Vec<u8>, salt: Vec<u8>, timeCost: u64, nRows: u64, nCo
 	}
 
 	//Initializes M[0] and M[1]
-	//println!("result: {:?}", memMatrix[0]);
-	//memMatrix[0] = wholeMatrix;
-	let mut memM = memMatrix[0].clone();
-	println!("s1: {:?}", state);
-	println!("m1: {:?}", memM[0]);
-	println!("m3: {:?}", %memMatrix[0]);
-	reducedSqueezeRow0(state, memM, nCols); //The locally copied password is most likely overwritten here
-	//reducedDuplexRow1(state, memMatrix[0], memMatrix[1], nCols)
-	println!("result: {:?}", state);
+	//reducedSqueezeRow0
+	//The locally copied password is most likely overwritten here
+	let mut ptr = (nCols - 1) * BLOCKLENINT64;
+	let mut ptrWord = wholeMatrix;
+	//M[row][C-1-col] = H.reduced_squeeze()
+	for _i in 0..nCols {
+		//In Lyra2: pointer to M[0][C-1]
+		ptrWord[ptr as usize] = state[0];
+		ptrWord[(ptr+1) as usize] = state[1];
+		ptrWord[(ptr+2) as usize] = state[2];
+		ptrWord[(ptr+3) as usize] = state[3];
+		ptrWord[(ptr+4) as usize] = state[4];
+		ptrWord[(ptr+5) as usize] = state[5];
+		ptrWord[(ptr+6) as usize] = state[6];
+		ptrWord[(ptr+7) as usize] = state[7];
+		ptrWord[(ptr+8) as usize] = state[8];
+		ptrWord[(ptr+9) as usize] = state[9];
+		ptrWord[(ptr+10) as usize] = state[10];
+		ptrWord[(ptr+11) as usize] = state[11];
+
+		//Goes to next block (column) that will receive the squeezed data
+		ptr = ptr.wrapping_sub(BLOCKLENINT64);
+
+		//Applies the reduced-round transformation f to the sponge's state
+		state = reducedBlake2bLyra(state);
+	}
+	for _y in 0.._nRows - 1 {
+		memMatrix[(_nRows - _y - 2) as usize] = 
+			cloneMem(memMatrix[(_nRows - _y - 2) as usize].clone(), &memMatrix[(_nRows - _y - 1) as usize]);
+	}
+	memMatrix[0] = ptrWord;
+	let mut ptrWordIn = memMatrix[0].clone();
+	let mut ptrWordOut = memMatrix[1].clone();
+	let mut ptrWordInOut = memMatrix[2].clone();
+
+	//reducedDuplexRow1
+	let mut ptrIn: u64 = 0;
+	let mut ptrOut = (nCols - 1) * BLOCKLENINT64;
+
+	for _i in 0..nCols {
+		//Absorbing "M[prev][col]"
+		state[0] ^= (ptrWordIn[ptrIn as usize]);
+		state[1] ^= (ptrWordIn[(ptrIn+1) as usize]);
+		state[2] ^= (ptrWordIn[(ptrIn+2) as usize]);
+		state[3] ^= (ptrWordIn[(ptrIn+3) as usize]);
+		state[4] ^= (ptrWordIn[(ptrIn+4) as usize]);
+		state[5] ^= (ptrWordIn[(ptrIn+5) as usize]);
+		state[6] ^= (ptrWordIn[(ptrIn+6) as usize]);
+		state[7] ^= (ptrWordIn[(ptrIn+7) as usize]);
+		state[8] ^= (ptrWordIn[(ptrIn+8) as usize]);
+		state[9] ^= (ptrWordIn[(ptrIn+9) as usize]);
+		state[10] ^= (ptrWordIn[(ptrIn+10) as usize]);
+		state[11] ^= (ptrWordIn[(ptrIn+11) as usize]);
+		//Applies the reduced-round transformation f to the sponge's state
+		state = reducedBlake2bLyra(state);
+
+		//M[row][C-1-col] = M[prev][col] XOR rand
+		ptrWordOut[ptrOut as usize] = ptrWordIn[ptrIn as usize] ^ state[0];
+		ptrWordOut[(ptrOut+1) as usize] = ptrWordIn[(ptrIn+1) as usize] ^ state[1];
+		ptrWordOut[(ptrOut+2) as usize] = ptrWordIn[(ptrIn+2) as usize] ^ state[2];
+		ptrWordOut[(ptrOut+3) as usize] = ptrWordIn[(ptrIn+3) as usize] ^ state[3];
+		ptrWordOut[(ptrOut+4) as usize] = ptrWordIn[(ptrIn+4) as usize] ^ state[4];
+		ptrWordOut[(ptrOut+5) as usize] = ptrWordIn[(ptrIn+5) as usize] ^ state[5];
+		ptrWordOut[(ptrOut+6) as usize] = ptrWordIn[(ptrIn+6) as usize] ^ state[6];
+		ptrWordOut[(ptrOut+7) as usize] = ptrWordIn[(ptrIn+7) as usize] ^ state[7];
+		ptrWordOut[(ptrOut+8) as usize] = ptrWordIn[(ptrIn+8) as usize] ^ state[8];
+		ptrWordOut[(ptrOut+9) as usize] = ptrWordIn[(ptrIn+9) as usize] ^ state[9];
+		ptrWordOut[(ptrOut+10) as usize] = ptrWordIn[(ptrIn+10) as usize] ^ state[10];
+		ptrWordOut[(ptrOut+11) as usize] = ptrWordIn[(ptrIn+11) as usize] ^ state[11];
+
+		//Input: next column (i.e., next block in sequence)
+		ptrIn = ptrIn.wrapping_add(BLOCKLENINT64);
+		//Output: goes to previous column
+		ptrOut = ptrOut.wrapping_sub(BLOCKLENINT64);
+	}
+	let mut ptrWordIn = cloneMem(ptrWordIn, &ptrWordOut);
+	memMatrix[0] = ptrWordIn;
+	memMatrix[1] = ptrWordOut;
+
+	let mut _x = row.clone();
+	for _x in _x..nRows {
+		//M[row] = rand; //M[row*] = M[row*] XOR rotW(rand)
+		//reducedDuplexRowSetup
+		let mut ptrIn: u64 = 0;
+		let mut ptrInOut: u64 = 0;
+		let mut ptrOut: u64 = (nCols - 1) * BLOCKLENINT64;
+
+		for _i in 0..nCols {
+			ptrWordIn = memMatrix[prev as usize].clone();       //In Lyra2: pointer to prev
+			ptrWordOut = memMatrix[row as usize].clone();       //In Lyra2: pointer to row
+			ptrWordInOut = memMatrix[rowa as usize].clone();    //In Lyra2: pointer to row
+
+			//Absorbing "M[prev] [+] M[row*]"
+			state[0] ^= ptrWordIn[ptrIn as usize].wrapping_add(ptrWordInOut[ptrInOut as usize]);
+			state[1] ^= ptrWordIn[(ptrIn+1) as usize].wrapping_add(ptrWordInOut[(ptrInOut+1) as usize]);
+			state[2] ^= ptrWordIn[(ptrIn+2) as usize].wrapping_add(ptrWordInOut[(ptrInOut+2) as usize]);
+			state[3] ^= ptrWordIn[(ptrIn+3) as usize].wrapping_add(ptrWordInOut[(ptrInOut+3) as usize]);
+			state[4] ^= ptrWordIn[(ptrIn+4) as usize].wrapping_add(ptrWordInOut[(ptrInOut+4) as usize]);
+			state[5] ^= ptrWordIn[(ptrIn+5) as usize].wrapping_add(ptrWordInOut[(ptrInOut+5) as usize]);
+			state[6] ^= ptrWordIn[(ptrIn+6) as usize].wrapping_add(ptrWordInOut[(ptrInOut+6) as usize]);
+			state[7] ^= ptrWordIn[(ptrIn+7) as usize].wrapping_add(ptrWordInOut[(ptrInOut+7) as usize]);
+			state[8] ^= ptrWordIn[(ptrIn+8) as usize].wrapping_add(ptrWordInOut[(ptrInOut+8) as usize]);
+			state[9] ^= ptrWordIn[(ptrIn+9) as usize].wrapping_add(ptrWordInOut[(ptrInOut+9) as usize]);
+			state[10] ^= ptrWordIn[(ptrIn+10) as usize].wrapping_add(ptrWordInOut[(ptrInOut+10) as usize]);
+			state[11] ^= ptrWordIn[(ptrIn+11) as usize].wrapping_add(ptrWordInOut[(ptrInOut+11) as usize]);
+
+			//Applies the reduced-round transformation f to the sponge's state
+			state = reducedBlake2bLyra(state);
+
+			//M[row][col] = M[prev][col] XOR rand
+			ptrWordOut[ptrOut as usize] = ptrWordIn[ptrIn as usize] ^ state[0];
+			ptrWordOut[(ptrOut+1) as usize] = ptrWordIn[(ptrIn+1) as usize] ^ state[1];
+			ptrWordOut[(ptrOut+2) as usize] = ptrWordIn[(ptrIn+2) as usize] ^ state[2];
+			ptrWordOut[(ptrOut+3) as usize] = ptrWordIn[(ptrIn+3) as usize] ^ state[3];
+			ptrWordOut[(ptrOut+4) as usize] = ptrWordIn[(ptrIn+4) as usize] ^ state[4];
+			ptrWordOut[(ptrOut+5) as usize] = ptrWordIn[(ptrIn+5) as usize] ^ state[5];
+			ptrWordOut[(ptrOut+6) as usize] = ptrWordIn[(ptrIn+6) as usize] ^ state[6];
+			ptrWordOut[(ptrOut+7) as usize] = ptrWordIn[(ptrIn+7) as usize] ^ state[7];
+			ptrWordOut[(ptrOut+8) as usize] = ptrWordIn[(ptrIn+8) as usize] ^ state[8];
+			ptrWordOut[(ptrOut+9) as usize] = ptrWordIn[(ptrIn+9) as usize] ^ state[9];
+			ptrWordOut[(ptrOut+10) as usize] = ptrWordIn[(ptrIn+10) as usize] ^ state[10];
+			ptrWordOut[(ptrOut+11) as usize] = ptrWordIn[(ptrIn+11) as usize] ^ state[11];
+
+			//M[row*][col] = M[row*][col] XOR rotW(rand)
+			ptrWordInOut[ptrInOut as usize] ^= state[11];
+			ptrWordInOut[(ptrInOut+1) as usize] ^= state[0];
+			ptrWordInOut[(ptrInOut+2) as usize] ^= state[1];
+			ptrWordInOut[(ptrInOut+3) as usize] ^= state[2];
+			ptrWordInOut[(ptrInOut+4) as usize] ^= state[3];
+			ptrWordInOut[(ptrInOut+5) as usize] ^= state[4];
+			ptrWordInOut[(ptrInOut+6) as usize] ^= state[5];
+			ptrWordInOut[(ptrInOut+7) as usize] ^= state[6];
+			ptrWordInOut[(ptrInOut+8) as usize] ^= state[7];
+			ptrWordInOut[(ptrInOut+9) as usize] ^= state[8];
+			ptrWordInOut[(ptrInOut+10) as usize] ^= state[9];
+			ptrWordInOut[(ptrInOut+11) as usize] ^= state[10];
+
+			//Inputs: next column (i.e., next block in sequence)
+			ptrInOut = ptrInOut.wrapping_add(BLOCKLENINT64);
+			ptrIn = ptrIn.wrapping_add(BLOCKLENINT64);
+			//Output: goes to previous column
+			ptrOut = ptrOut.wrapping_sub(BLOCKLENINT64);
+
+			memMatrix[prev as usize] = ptrWordIn;
+			memMatrix[row as usize] = ptrWordOut;
+			memMatrix[rowa as usize] = ptrWordInOut;
+			let mut _nRows : usize = nRows as usize;
+			for _y in 0.._nRows - 1 {
+				memMatrix[(_nRows - _y - 2) as usize] = 
+					cloneMem(memMatrix[(_nRows - _y - 2) as usize].clone(), &memMatrix[(_nRows - _y - 1) as usize]);
+			}
+		}
+
+		//updates the value of row* (deterministically picked during Setup))
+		rowa = (rowa + step as u64) & (window - 1);
+		//update prev: it now points to the last row ever computed
+		prev = row as u64;
+		//updates row: goes to the next row to be computed
+		row = row + 1;
+
+		//Checks if all rows in the window where visited.
+		if rowa == 0 {
+			step = (window as i32 + gap) as i32; //changes the step: approximately doubles its value
+			window *= 2;              //doubles the size of the re-visitation window
+			gap = -gap;          //inverts the modifier to the step
+		}
+	}
+	//==========================================================================/
+
+	let mut wholeMatrix: Vec<u64> = memMatrix[0].clone();
+
+	//============================ Wandering Phase =============================//
+	let mut row: i32 = 0; //Resets the visitation to the first row of the memory matrix
+	for tau in 1..timeCost + 1 {
+		//Step is approximately half the number of all rows of the memory matrix for an odd tau; otherwise, it is -1
+		step = nRows as i32 /2 - 1;
+		if tau%2 == 0 {
+			step = -1;
+		}
+
+		let mut row0: bool = false;
+		while !row0 {
+			//Selects a pseudorandom index row*
+			//------------------------------------------------------------------------------------------
+			//rowa = ((unsigned int)state[0]) & (nRows-1);	//(USE THIS IF nRows IS A POWER OF 2)
+			rowa = state[0] % nRows as u64; //(USE THIS FOR THE "GENERIC" CASE)
+			//------------------------------------------------------------------------------------------
+
+			//Performs a reduced-round duplexing operation over M[row*] XOR M[prev], updating both M[row*] and M[row]
+			//reducedDuplexRow(state, memMatrix[prev], memMatrix[rowa], memMatrix[row], nCols)
+			for _i in 0..nCols {
+				state[0] ^= wholeMatrix[(_i as u64*BLOCKLENINT64 + prev*48 +0) as usize].wrapping_add(wholeMatrix[(_i as u64*BLOCKLENINT64+ rowa*48 +0) as usize]);
+				state[1] ^= wholeMatrix[(_i as u64*BLOCKLENINT64 + prev*48 +1) as usize].wrapping_add(wholeMatrix[(_i as u64*BLOCKLENINT64+ rowa*48 +1) as usize]);
+				state[2] ^= wholeMatrix[(_i as u64*BLOCKLENINT64 + prev*48 +2) as usize].wrapping_add(wholeMatrix[(_i as u64*BLOCKLENINT64+ rowa*48 +2) as usize]);
+				state[3] ^= wholeMatrix[(_i as u64*BLOCKLENINT64 + prev*48 +3) as usize].wrapping_add(wholeMatrix[(_i as u64*BLOCKLENINT64+ rowa*48 +3) as usize]);
+				state[4] ^= wholeMatrix[(_i as u64*BLOCKLENINT64 + prev*48 +4) as usize].wrapping_add(wholeMatrix[(_i as u64*BLOCKLENINT64+ rowa*48 +4) as usize]);
+				state[5] ^= wholeMatrix[(_i as u64*BLOCKLENINT64 + prev*48 +5) as usize].wrapping_add(wholeMatrix[(_i as u64*BLOCKLENINT64+ rowa*48 +5) as usize]);
+				state[6] ^= wholeMatrix[(_i as u64*BLOCKLENINT64 + prev*48 +6) as usize].wrapping_add(wholeMatrix[(_i as u64*BLOCKLENINT64+ rowa*48 +6) as usize]);
+				state[7] ^= wholeMatrix[(_i as u64*BLOCKLENINT64 + prev*48 +7) as usize].wrapping_add(wholeMatrix[(_i as u64*BLOCKLENINT64+ rowa*48 +7) as usize]);
+				state[8] ^= wholeMatrix[(_i as u64*BLOCKLENINT64 + prev*48 +8) as usize].wrapping_add(wholeMatrix[(_i as u64*BLOCKLENINT64+ rowa*48 +8) as usize]);
+				state[9] ^= wholeMatrix[(_i as u64*BLOCKLENINT64 + prev*48 +9) as usize].wrapping_add(wholeMatrix[(_i as u64*BLOCKLENINT64+ rowa*48 +9) as usize]);
+				state[10] ^= wholeMatrix[(_i as u64*BLOCKLENINT64 + prev*48 +10) as usize].wrapping_add(wholeMatrix[(_i as u64*BLOCKLENINT64+ rowa*48 +10) as usize]);
+				state[11] ^= wholeMatrix[(_i as u64*BLOCKLENINT64 + prev*48 +11) as usize].wrapping_add(wholeMatrix[(_i as u64*BLOCKLENINT64+ rowa*48 +11) as usize]);
+
+				//Applies the reduced-round transformation f to the sponge's state
+				state = reducedBlake2bLyra(state);
+
+				//M[rowOut][col] = M[rowOut][col] XOR rand
+				wholeMatrix[(_i as u64*BLOCKLENINT64 + (row*48) as u64 +0) as usize] ^= state[0];
+				wholeMatrix[(_i as u64*BLOCKLENINT64 + (row*48) as u64 +1) as usize] ^= state[1];
+				wholeMatrix[(_i as u64*BLOCKLENINT64 + (row*48) as u64 +2) as usize] ^= state[2];
+				wholeMatrix[(_i as u64*BLOCKLENINT64 + (row*48) as u64 +3) as usize] ^= state[3];
+				wholeMatrix[(_i as u64*BLOCKLENINT64 + (row*48) as u64 +4) as usize] ^= state[4];
+				wholeMatrix[(_i as u64*BLOCKLENINT64 + (row*48) as u64 +5) as usize] ^= state[5];
+				wholeMatrix[(_i as u64*BLOCKLENINT64 + (row*48) as u64 +6) as usize] ^= state[6];
+				wholeMatrix[(_i as u64*BLOCKLENINT64 + (row*48) as u64 +7) as usize] ^= state[7];
+				wholeMatrix[(_i as u64*BLOCKLENINT64 + (row*48) as u64 +8) as usize] ^= state[8];
+				wholeMatrix[(_i as u64*BLOCKLENINT64 + (row*48) as u64 +9) as usize] ^= state[9];
+				wholeMatrix[(_i as u64*BLOCKLENINT64 + (row*48) as u64 +10) as usize] ^= state[10];
+				wholeMatrix[(_i as u64*BLOCKLENINT64 + (row*48) as u64 +11) as usize] ^= state[11];
+
+				//M[rowInOut][col] = M[rowInOut][col] XOR rotW(rand)
+				wholeMatrix[(_i as u64*BLOCKLENINT64 + rowa*48 +0) as usize] ^= state[11];
+				wholeMatrix[(_i as u64*BLOCKLENINT64 + rowa*48 +1) as usize] ^= state[0];
+				wholeMatrix[(_i as u64*BLOCKLENINT64 + rowa*48 +2) as usize] ^= state[1];
+				wholeMatrix[(_i as u64*BLOCKLENINT64 + rowa*48 +3) as usize] ^= state[2];
+				wholeMatrix[(_i as u64*BLOCKLENINT64 + rowa*48 +4) as usize] ^= state[3];
+				wholeMatrix[(_i as u64*BLOCKLENINT64 + rowa*48 +5) as usize] ^= state[4];
+				wholeMatrix[(_i as u64*BLOCKLENINT64 + rowa*48 +6) as usize] ^= state[5];
+				wholeMatrix[(_i as u64*BLOCKLENINT64 + rowa*48 +7) as usize] ^= state[6];
+				wholeMatrix[(_i as u64*BLOCKLENINT64 + rowa*48 +8) as usize] ^= state[7];
+				wholeMatrix[(_i as u64*BLOCKLENINT64 + rowa*48 +9) as usize] ^= state[8];
+				wholeMatrix[(_i as u64*BLOCKLENINT64 + rowa*48 +10) as usize] ^= state[9];
+				wholeMatrix[(_i as u64*BLOCKLENINT64 + rowa*48 +11) as usize] ^= state[10];
+			}
+
+			//update prev: it now points to the last row ever computed
+			prev = row as u64;
+
+			//updates row: goes to the next row to be computed
+			//------------------------------------------------------------------------------------------
+			//row = (row + step) & (nRows-1);	//(USE THIS IF nRows IS A POWER OF 2)
+			row = (row as i32 + step) % nRows as i32; //(USE THIS FOR THE "GENERIC" CASE)
+			//------------------------------------------------------------------------------------------
+			if row == 0 {
+				row0 = true;
+			}
+		}
+	}
+	//==========================================================================/
+	println!("wholeMatrix: {:?}", wholeMatrix);
+	//println!("state: {:?}", memMatrix[0]);
 }
 
 fn main() {
