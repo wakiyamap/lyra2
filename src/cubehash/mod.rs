@@ -306,7 +306,7 @@ fn sixteen_rounds(mut c: CubeHash) -> CubeHash{
 
 //cubehash256 calculates cubuhash256.
 //length of data must be 32 bytes.
-fn cubehash256(data: Vec<u8>) -> Vec<u8>{
+pub fn sum(data: Vec<u8>) -> Vec<u8>{
 	let c = new_cube_hash();
 	let inputdata = Bytes::from(data);
 	let c = input_block(inputdata, c);
@@ -336,14 +336,4 @@ fn cubehash256(data: Vec<u8>) -> Vec<u8>{
 	out.put_u32_le(c.x6);
 	out.put_u32_le(c.x7);
 	return out;
-}
-
-fn main() {
-	//let data = Bytes::from("1833a9fa7cf4086bd5fda73da32e5a1d");
-	//let result = cubehash256(data);
-	//println!("result: {:x}", result);
-	let data: Vec<u8> = "1833a9fa7cf4086bd5fda73da32e5a1d".as_bytes().to_vec();
-	let out = cubehash256(data);
-	let result = Bytes::from(out);
-	println!("result: {:x}", result);
 }

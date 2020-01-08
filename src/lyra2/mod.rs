@@ -1,5 +1,4 @@
 use byteorder::{ByteOrder, LittleEndian};
-use bytes::Bytes;
 
 const BLAKE2BIV: [u64; 8] = [
 	0x6a09e667f3bcc908, 0xbb67ae8584caa73b,
@@ -222,7 +221,7 @@ fn absorb_block_blake2_safe(mut s: [u64; 16], w: Vec<u64>) -> [u64; 16]{
 // @param n_cols Number of columns of the memory matrix (C)
 //
 // @return 0 if the key is generated correctly; -1 if there is an error (usually due to lack of memory for allocation)
-fn lyra2(mut k: Vec<u8>, pwd: Vec<u8>, salt: Vec<u8>, time_cost: u64, n_rows: u64, n_cols: u64) -> Vec<u8>{
+pub fn sum(mut k: Vec<u8>, pwd: Vec<u8>, salt: Vec<u8>, time_cost: u64, n_rows: u64, n_cols: u64) -> Vec<u8>{
 
 	//============================= Basic variables ============================//
 	let mut row: u64 = 2;    //index of row to be processed
@@ -524,14 +523,4 @@ fn lyra2(mut k: Vec<u8>, pwd: Vec<u8>, salt: Vec<u8>, time_cost: u64, n_rows: u6
 	k = squeeze(state, k);
 	return k;
 	//==========================================================================/
-
-}
-
-fn main() {
-	let resultcube1: Vec<u8> = "😀😃😄😁".as_bytes().to_vec();
-	let resultcube2: Vec<u8> = resultcube1.clone();
-	let lyra2result: Vec<u8> = "00000000000000000000000000000000".as_bytes().to_vec();
-	let out = lyra2(lyra2result, resultcube1, resultcube2, 1, 4, 4);
-	let result = Bytes::from(out);
-	println!("result: {:x}", result);
 }

@@ -116,9 +116,9 @@ fn compress(mut b: Bmw, m: [u32; 16]) -> Bmw{
 	return b
 }
 
-//bmw256 calculates bmw256.
+//sum calculates bmw256.
 //length of data must be 32 bytes.
-fn bmw256(mut input: Vec<u8>) -> Vec<u8>{
+pub fn sum(mut input: Vec<u8>) -> Vec<u8>{
 	let mut b = new();
 	let mut buf = vec![0; 32];
 	buf[0] = 0x80;
@@ -152,10 +152,3 @@ fn bmw256(mut input: Vec<u8>) -> Vec<u8>{
 	out.put_u32_le(b.h[15]);
 	return out;
 }
-
-fn main() {
-	let input: Vec<u8> = "1833a9fa7cf4086bd5fda73da32e5a1d".as_bytes().to_vec();
-	//bmw256(input);
-	let result = bmw256(input);
-	let output = Bytes::from(result);
-	println!("result: {:x}", output);}
