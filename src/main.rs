@@ -12,7 +12,7 @@ use digest::generic_array::typenum::U32;
 fn main() {
 
 	let mut blake256 = blake_hash::Blake256::new();
-	blake256.input(b"griaopjgi-0jewa8ihj0-98243h09");
+	blake256.input(b"abc");
 	let result_blake = blake256.result();
 
 	let mut keccak256 = Keccak256::new();
@@ -32,4 +32,5 @@ fn main() {
 	let result_bmw = bmw::sum(result_cube3);
 	let result = Bytes::from(result_bmw);
 	println!("result: {:x}", result);
+	println!("result: {}", result.iter().map(|n| format!("{:02x}", n)).collect::<String>());
 }

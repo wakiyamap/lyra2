@@ -1,10 +1,10 @@
 use byteorder::{ByteOrder, LittleEndian};
 
 const BLAKE2BIV: [u64; 8] = [
-	0x6a09e667f3bcc908, 0xbb67ae8584caa73b,
-	0x3c6ef372fe94f82b, 0xa54ff53a5f1d36f1,
-	0x510e527fade682d1, 0x9b05688c2b3e6c1f,
-	0x1f83d9abfb41bd6b, 0x5be0cd19137e2179,
+	0x6a09_e667_f3bc_c908, 0xbb67_ae85_84ca_a73b,
+	0x3c6e_f372_fe94_f82b, 0xa54f_f53a_5f1d_36f1,
+	0x510e_527f_ade6_82d1, 0x9b05_688c_2b3e_6c1f,
+	0x1f83_d9ab_fb41_bd6b, 0x5be0_cd19_137e_2179,
 ];
 
 const BLOCKLENINT64: u64 = 12;                //Block length: 768 bits (=96 bytes, =12 uint64_t)
@@ -523,4 +523,25 @@ pub fn sum(mut k: Vec<u8>, pwd: Vec<u8>, salt: Vec<u8>, time_cost: u64, n_rows: 
 	k = squeeze(state, k);
 	return k;
 	//==========================================================================/
+}
+
+#[test]
+fn lyra2_hash_cal() {
+	let base1 = "abc".as_bytes().to_vec();
+	let base2 = base1.clone();
+	let resultsize1: Vec<u8> = "000000000000000000000000dddd0000".as_bytes().to_vec();
+	let lyra2_result1 = sum(resultsize1, base1, base2, 1, 4, 4);
+	assert_eq!("8f63758bd178f014ea3fd4df09ff0a61646dc574a0b6bcf2890ec529a6a7360c", lyra2_result1.iter().map(|n| format!("{:02x}", n)).collect::<String>());
+
+	let base3 = "脇山珠美ちゃん可愛い！".as_bytes().to_vec();
+	let base4 = base3.clone();
+	let resultsize2: Vec<u8> = "0000000000000000b00000000000000000000000".as_bytes().to_vec();
+	let lyra2_result2 = sum(resultsize2, base3, base4, 1, 3, 4);
+	assert_eq!("b12dc40c91ea7466724b9b0c00b07c412944049b025ac267770b33219b394649aa15c048579de120", lyra2_result2.iter().map(|n| format!("{:02x}", n)).collect::<String>());
+
+	let base5 = "😀😁😂".as_bytes().to_vec();
+	let base6 = base5.clone();
+	let resultsize3: Vec<u8> = "000000000000000000000000000a".as_bytes().to_vec();
+	let lyra2_result3 = sum(resultsize3, base5, base6, 1, 4, 2);
+	assert_eq!("7013ca50ace402830167072c093b002891df858fadfcd2535d68992b", lyra2_result3.iter().map(|n| format!("{:02x}", n)).collect::<String>());
 }
