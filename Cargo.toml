@@ -1,5 +1,5 @@
 [package]
-name = "rust-lyra2"
+name = "lyra2"
 version = "0.1.0"
 authors = ["wakiyamap <wakiyamap@gmail.com>"]
 edition = "2018"

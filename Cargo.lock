@@ -74,17 +74,7 @@ version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
-name = "opaque-debug"
-version = "0.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-
-[[package]]
-name = "ppv-lite86"
-version = "0.2.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-
-[[package]]
-name = "rust-lyra2"
+name = "lyra2"
 version = "0.1.0"
 dependencies = [
  "blake-hash 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -94,6 +84,16 @@ dependencies = [
  "sha3 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "skein-hash 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
+
+[[package]]
+name = "opaque-debug"
+version = "0.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "ppv-lite86"
+version = "0.2.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "sha3"
