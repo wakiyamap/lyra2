@@ -243,7 +243,7 @@ pub fn sum(
     let mut window: u64 = 2; //Visitation window (used to define which rows can be revisited during Setup)
     let mut gap: i32 = 1; //Modifier to the step, assuming the values 1 or -1
     let mut _i: u64 = 0; //auxiliary iteration counter
-                         //==========================================================================/
+    //==========================================================================/
 
     //========== Initializing the Memory Matrix and pointers to it =============//
     //Tries to allocate enough space for the whole memory matrix
@@ -298,10 +298,10 @@ pub fn sum(
 
     //Now comes the padding
     whole_matrix[ptr_byte] = 0x80; //first byte of padding: right after the password
-                                   //resets the pointer to the start of the memory matrix
+    //resets the pointer to the start of the memory matrix
     ptr_byte = ((n_blocks_input * BLOCKLENBLAKE2SAFEBYTES) / 8 - 1) as usize; //sets the pointer to the correct position: end of incomplete block
     whole_matrix[ptr_byte] ^= 0x0100000000000000; //last byte of padding: at the end of the last incomplete block00
-                                                  //==========================================================================/
+    //==========================================================================/
 
     //======================= Initializing the Sponge State ====================//
     //Sponge state: 16 uint64_t, BLOCK_LEN_INT64 words of them for the bitrate (b) and the remainder for the capacity (c)
@@ -520,7 +520,7 @@ pub fn sum(
             //------------------------------------------------------------------------------------------
             //rowa = ((unsigned int)state[0]) & (n_rows-1);	//(USE THIS IF n_rows IS A POWER OF 2)
             rowa = state[0] % n_rows as u64; //(USE THIS FOR THE "GENERIC" CASE)
-                                             //------------------------------------------------------------------------------------------
+            //------------------------------------------------------------------------------------------
 
             //Performs a reduced-round duplexing operation over M[row*] XOR M[prev], updating both M[row*] and M[row]
             //reducedDuplexRow(state, memMatrix[prev], memMatrix[rowa], memMatrix[row], n_cols)
@@ -616,7 +616,7 @@ pub fn sum(
             //------------------------------------------------------------------------------------------
             //row = (row + step) & (n_rows-1);	//(USE THIS IF n_rows IS A POWER OF 2)
             row = (row + step as u64) % n_rows; //(USE THIS FOR THE "GENERIC" CASE)
-                                                //------------------------------------------------------------------------------------------
+            //------------------------------------------------------------------------------------------
             if row == 0 {
                 row0 = true;
             }
