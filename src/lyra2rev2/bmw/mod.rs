@@ -1,5 +1,4 @@
 use byteorder::{ByteOrder, LittleEndian};
-use bytes::{Bytes, BufMut};
 
 const INITVAL: [u32; 16] = [
 	0x4041_4243, 0x4445_4647, 0x4849_4A4B, 0x4C4D_4E4F,
@@ -118,18 +117,29 @@ fn compress(mut b: Bmw, m: [u32; 16]) -> Bmw{
 
 //sum calculates bmw256.
 //length of data must be 32 bytes.
-pub fn sum(mut input: Vec<u8>) -> Vec<u8>{
+pub fn sum(input: Vec<u8>) -> Vec<u8>{
 	let mut b = new();
-	let mut buf = vec![0; 32];
-	buf[0] = 0x80;
-	//TODO
-	input.extend(buf);
-	input[57] = 1;
-	let mut inputbuf = Bytes::from(input);
+	let mut buf: Vec<u8> = Vec::with_capacity(64);
+	for _i in 0..input.len() {
+		buf.push(input[_i]);
+	}
+	for _i in input.len()+1..65 {
+		buf.push(0);
+	}
+	buf[input.len() as usize] = 0x80;
+	let bit_len = ((input.len() as u64) << 3).to_le_bytes();
+	buf[56] = bit_len[0];
+	buf[57] = bit_len[1];
+	buf[58] = bit_len[2];
+	buf[59] = bit_len[3];
+	buf[60] = bit_len[4];
+	buf[61] = bit_len[5];
+	buf[62] = bit_len[6];
+	buf[63] = bit_len[7];
 	let mut _i = 0;
 	for _i in 0..16 {
-		b.m[_i] = LittleEndian::read_u32(&inputbuf);
-		let _ = &inputbuf.split_to(4);
+		let (_, mut _right) = &buf.split_at(4*_i);
+		b.m[_i] = LittleEndian::read_u32(_right);
 	}
 	let m = b.m;
 	let mut b = compress(b, m);
@@ -142,13 +152,29 @@ pub fn sum(mut input: Vec<u8>) -> Vec<u8>{
 	let h2 = b.h2;
 	let b = compress(b, h2);
 	let mut out = vec![];
-	out.put_u32_le(b.h[8]);
-	out.put_u32_le(b.h[9]);
-	out.put_u32_le(b.h[10]);
-	out.put_u32_le(b.h[11]);
-	out.put_u32_le(b.h[12]);
-	out.put_u32_le(b.h[13]);
-	out.put_u32_le(b.h[14]);
-	out.put_u32_le(b.h[15]);
+	out.extend_from_slice(&b.h[8].to_le_bytes());
+	out.extend_from_slice(&b.h[9].to_le_bytes());
+	out.extend_from_slice(&b.h[10].to_le_bytes());
+	out.extend_from_slice(&b.h[11].to_le_bytes());
+	out.extend_from_slice(&b.h[12].to_le_bytes());
+	out.extend_from_slice(&b.h[13].to_le_bytes());
+	out.extend_from_slice(&b.h[14].to_le_bytes());
+	out.extend_from_slice(&b.h[15].to_le_bytes());
 	return out;
+}
+
+
+#[test]
+fn bmw_hash_cal() {
+	let base1 = "abc".as_bytes().to_vec();
+	let bmw_result1 = sum(base1);
+	assert_eq!("57d11fc94bdf98e6a0d0bf1d4ddda3f4205e873666a644b5bb585e171ad87d34", bmw_result1.iter().map(|n| format!("{:02x}", n)).collect::<String>());
+
+	let base2 = "脇山珠美ちゃん可愛い！".as_bytes().to_vec();
+	let bmw_result2 = sum(base2);
+	assert_eq!("9e1f70ca841421dc44589b1ddafa8f81a5248da3c9458660a53c8f4c7b7ad09b", bmw_result2.iter().map(|n| format!("{:02x}", n)).collect::<String>());
+
+	let base3 = "😀😁😂".as_bytes().to_vec();
+	let bmw_result3 = sum(base3);
+	assert_eq!("9978ccbde1db31dcc1bfd7a010d9ae2215e5fb91e9ecaf786be6252c621f60e3", bmw_result3.iter().map(|n| format!("{:02x}", n)).collect::<String>());
 }
