@@ -138,16 +138,17 @@ fn reduced_blake2b_lyra(mut v: [u64; 16]) -> [u64; 16]{
  * @param out        Array that will receive the data squeezed
  * @param len        The number of bytes to be squeezed into the "out" array
  */
-fn squeeze(mut state: [u64; 16], mut out: Vec<u8>) -> Vec<u8>{
+fn squeeze(mut state: [u64; 16], output_size: u64) -> Vec<u8>{
 	let mut tmp = vec![];
+	let mut out = vec![0; output_size as usize];
 	let mut _j = 0;
-	let jmax = out.len()/BLOCKLENBYTES as usize + 1;
+	let jmax = output_size/BLOCKLENBYTES + 1;
 	for _j in 0..jmax {
-		for _i in 0..BLOCKLENINT64 as usize {
+		for _i in 0..BLOCKLENINT64 {
 			tmp.extend_from_slice(&state[_i as usize].to_le_bytes());
 		}
 		//be care in case of len(out[i:])<len(tmp)
-		for _i in 0..out.len() as usize {
+		for _i in 0..output_size as usize {
 			out[_i] = tmp[_i];
 		}
 		state = blake2b_lyra(state);
@@ -221,7 +222,7 @@ fn absorb_block_blake2_safe(mut s: [u64; 16], w: Vec<u64>) -> [u64; 16]{
 // @param n_cols Number of columns of the memory matrix (C)
 //
 // @return 0 if the key is generated correctly; -1 if there is an error (usually due to lack of memory for allocation)
-pub fn sum(mut k: Vec<u8>, pwd: Vec<u8>, salt: Vec<u8>, time_cost: u64, n_rows: u64, n_cols: u64) -> Vec<u8>{
+pub fn sum(k: u64, pwd: Vec<u8>, salt: Vec<u8>, time_cost: u64, n_rows: u64, n_cols: u64) -> Vec<u8>{
 
 	//============================= Basic variables ============================//
 	let mut row: u64 = 2;    //index of row to be processed
@@ -271,7 +272,7 @@ pub fn sum(mut k: Vec<u8>, pwd: Vec<u8>, salt: Vec<u8>, time_cost: u64, n_rows: 
 	ptr_byte += (salt.len() as u64 / 8) as usize;
 
 	//Concatenates the basil: every integer passed as parameter, in the order they are provided by the interface
-	whole_matrix[ptr_byte] = k.len() as u64;
+	whole_matrix[ptr_byte] = k;
 	ptr_byte += 1;
 	whole_matrix[ptr_byte] = pwd.len() as u64;
 	ptr_byte += 1;
@@ -520,8 +521,8 @@ pub fn sum(mut k: Vec<u8>, pwd: Vec<u8>, salt: Vec<u8>, time_cost: u64, n_rows: 
 	let (_, mut _right) = &whole_matrix.split_at((rowa * row_len_int64) as usize);
 	state = absorb_block(state, _right.to_vec());
 	//Squeezes the key
-	k = squeeze(state, k);
-	return k;
+	let result = squeeze(state, k);
+	return result;
 	//==========================================================================/
 }
 
@@ -529,19 +530,16 @@ pub fn sum(mut k: Vec<u8>, pwd: Vec<u8>, salt: Vec<u8>, time_cost: u64, n_rows: 
 fn lyra2_hash_cal() {
 	let base1 = "abc".as_bytes().to_vec();
 	let base2 = base1.clone();
-	let resultsize1: Vec<u8> = "000000000000000000000000dddd0000".as_bytes().to_vec();
-	let lyra2_result1 = sum(resultsize1, base1, base2, 1, 4, 4);
+	let lyra2_result1 = sum(32, base1, base2, 1, 4, 4);
 	assert_eq!("8f63758bd178f014ea3fd4df09ff0a61646dc574a0b6bcf2890ec529a6a7360c", lyra2_result1.iter().map(|n| format!("{:02x}", n)).collect::<String>());
 
 	let base3 = "脇山珠美ちゃん可愛い！".as_bytes().to_vec();
 	let base4 = base3.clone();
-	let resultsize2: Vec<u8> = "0000000000000000b00000000000000000000000".as_bytes().to_vec();
-	let lyra2_result2 = sum(resultsize2, base3, base4, 1, 3, 4);
-	assert_eq!("b12dc40c91ea7466724b9b0c00b07c412944049b025ac267770b33219b394649aa15c048579de120", lyra2_result2.iter().map(|n| format!("{:02x}", n)).collect::<String>());
+	let lyra2_result2 = sum(48, base3, base4, 1, 3, 4);
+	assert_eq!("1bd5e9731a0f6475b3c2add5358f0d1eeac66f3f5d5b4d2346fbae196757a6e00193671974128a18af696313f07310b7", lyra2_result2.iter().map(|n| format!("{:02x}", n)).collect::<String>());
 
 	let base5 = "😀😁😂".as_bytes().to_vec();
 	let base6 = base5.clone();
-	let resultsize3: Vec<u8> = "000000000000000000000000000a".as_bytes().to_vec();
-	let lyra2_result3 = sum(resultsize3, base5, base6, 1, 4, 2);
-	assert_eq!("7013ca50ace402830167072c093b002891df858fadfcd2535d68992b", lyra2_result3.iter().map(|n| format!("{:02x}", n)).collect::<String>());
+	let lyra2_result3 = sum(16, base5, base6, 1, 4, 2);
+	assert_eq!("372557ef600c8c76bedd91ecd5a01f45", lyra2_result3.iter().map(|n| format!("{:02x}", n)).collect::<String>());
 }

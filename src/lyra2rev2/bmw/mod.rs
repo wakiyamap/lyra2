@@ -123,7 +123,7 @@ pub fn sum(input: Vec<u8>) -> Vec<u8>{
 	for _i in 0..input.len() {
 		buf.push(input[_i]);
 	}
-	for _i in input.len()+1..65 {
+	for _i in input.len()..64 {
 		buf.push(0);
 	}
 	buf[input.len() as usize] = 0x80;

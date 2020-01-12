@@ -1,8 +1,7 @@
 use byteorder::{ByteOrder, LittleEndian};
-use bytes::{Bytes, BufMut};
 
 const IV: [u32; 32] = [
-    	0xEA2B_D4B4, 0xCCD6_F29F, 0x6311_7E71, 0x3548_1EAE,
+	0xEA2B_D4B4, 0xCCD6_F29F, 0x6311_7E71, 0x3548_1EAE,
 	0x2251_2D5B, 0xE5D9_4E63, 0x7E62_4131, 0xF4CC_12BE,
 	0xC2D0_B696, 0x42AF_2070, 0xD072_0C35, 0x3361_DA8C,
 	0x28CC_ECA4, 0x8EF8_AD83, 0x4680_AC00, 0x40E5_FBAB,
@@ -85,22 +84,23 @@ fn new_cube_hash() -> CubeHash {
 	return c;
 }
 
-fn input_block(mut data: Bytes, mut c: CubeHash) -> CubeHash{
-	c.x0 ^= LittleEndian::read_u32(&data);
-	let _ = &data.split_to(4);
-	c.x1 ^= LittleEndian::read_u32(&data);
-	let _ = &data.split_to(4);
-	c.x2 ^= LittleEndian::read_u32(&data);
-	let _ = &data.split_to(4);
-	c.x3 ^= LittleEndian::read_u32(&data);
-	let _ = &data.split_to(4);
-	c.x4 ^= LittleEndian::read_u32(&data);
-	let _ = &data.split_to(4);
-	c.x5 ^= LittleEndian::read_u32(&data);
-	let _ = &data.split_to(4);
-	c.x6 ^= LittleEndian::read_u32(&data);
-	let _ = &data.split_to(4);
-	c.x7 ^= LittleEndian::read_u32(&data);
+fn input_block(data: Vec<u8>, mut c: CubeHash) -> CubeHash{
+	let (_, mut _right) = &data.split_at(0);
+	c.x0 ^= LittleEndian::read_u32(_right);
+	let (_, mut _right) = &data.split_at(4);
+	c.x1 ^= LittleEndian::read_u32(_right);
+	let (_, mut _right) = &data.split_at(8);
+	c.x2 ^= LittleEndian::read_u32(_right);
+	let (_, mut _right) = &data.split_at(12);
+	c.x3 ^= LittleEndian::read_u32(_right);
+	let (_, mut _right) = &data.split_at(16);
+	c.x4 ^= LittleEndian::read_u32(_right);
+	let (_, mut _right) = &data.split_at(20);
+	c.x5 ^= LittleEndian::read_u32(_right);
+	let (_, mut _right) = &data.split_at(24);
+	c.x6 ^= LittleEndian::read_u32(_right);
+	let (_, mut _right) = &data.split_at(28);
+	c.x7 ^= LittleEndian::read_u32(_right);
 	return c;
 }
 
@@ -307,33 +307,37 @@ fn sixteen_rounds(mut c: CubeHash) -> CubeHash{
 //cubehash256 calculates cubuhash256.
 //length of data must be 32 bytes.
 pub fn sum(data: Vec<u8>) -> Vec<u8>{
-	let c = new_cube_hash();
-	let inputdata = Bytes::from(data);
-	let c = input_block(inputdata, c);
-	let c = sixteen_rounds(c);
+	let mut c = new_cube_hash();
 	let mut buf = vec![0; 32];
 	buf[0] = 0x80;
-	let c = input_block(Bytes::from(buf), c);
-	let mut c = sixteen_rounds(c);
+	//let mut inputdata = data.clone();
+	//for _i in data.len()..32 {
+	//	inputdata.push(0);
+	//}
+	//c = input_block(inputdata, c);
+	c = input_block(data, c);
+	c = sixteen_rounds(c);
+	c = input_block(buf, c);
+	c = sixteen_rounds(c);
 	c.xv ^= 1;
-	let c = sixteen_rounds(c);
-	let c = sixteen_rounds(c);
-	let c = sixteen_rounds(c);
-	let c = sixteen_rounds(c);
-	let c = sixteen_rounds(c);
-	let c = sixteen_rounds(c);
-	let c = sixteen_rounds(c);
-	let c = sixteen_rounds(c);
-	let c = sixteen_rounds(c);
-	let c = sixteen_rounds(c);
+	for _j in 0..10 {
+		c = sixteen_rounds(c);
+	}
 	let mut out = vec![];
-	out.put_u32_le(c.x0);
-	out.put_u32_le(c.x1);
-	out.put_u32_le(c.x2);
-	out.put_u32_le(c.x3);
-	out.put_u32_le(c.x4);
-	out.put_u32_le(c.x5);
-	out.put_u32_le(c.x6);
-	out.put_u32_le(c.x7);
+	out.extend_from_slice(&c.x0.to_le_bytes());
+	out.extend_from_slice(&c.x1.to_le_bytes());
+	out.extend_from_slice(&c.x2.to_le_bytes());
+	out.extend_from_slice(&c.x3.to_le_bytes());
+	out.extend_from_slice(&c.x4.to_le_bytes());
+	out.extend_from_slice(&c.x5.to_le_bytes());
+	out.extend_from_slice(&c.x6.to_le_bytes());
+	out.extend_from_slice(&c.x7.to_le_bytes());
 	return out;
+}
+
+#[test]
+fn cubehash_hash_cal() {
+	let base1 = "00000000000000000000000000000000".as_bytes().to_vec();
+	let cubehash_result1 = sum(base1);
+	assert_eq!("f83989901eb3c366e7d7469f8ea8ef0694043cd42deb6252089ff38fb7892f3d", cubehash_result1.iter().map(|n| format!("{:02x}", n)).collect::<String>());
 }
