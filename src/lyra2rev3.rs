@@ -2,23 +2,18 @@ use crate::bmw;
 use crate::cubehash;
 use crate::lyra2mod;
 use blake_hash::Blake256;
-use digest::generic_array::typenum::U32;
-use groestl::Groestl256;
-use sha3::Keccak256;
 use skein_hash::Digest;
 
 pub fn sum(input: Vec<u8>) -> Vec<u8> {
     let mut blake256 = Blake256::new();
     blake256.input(input);
-    let result_blake_1 = blake256.result().to_vec();
-    let result_blake_2 = result_blake_1.clone();
+    let result_blake = blake256.result().to_vec();
 
-    let result_lyra2_mod_1 = lyra2mod::sum(32, result_blake_1, result_blake_2, 1, 4, 4);
+    let result_lyra2_mod_1 = lyra2mod::sum(result_blake);
 
-    let result_cube1 = cubehash::sum(result_lyra2_mod_1);
-    let result_cube2 = result_cube1.clone();
+    let result_cube = cubehash::sum(result_lyra2_mod_1);
 
-    let result_lyra2_mod_2 = lyra2mod::sum(32, result_cube1, result_cube2, 1, 4, 4);
+    let result_lyra2_mod_2 = lyra2mod::sum(result_cube);
 
     let result_bmw = bmw::sum(result_lyra2_mod_2);
     return result_bmw;

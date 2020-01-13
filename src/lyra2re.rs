@@ -16,9 +16,9 @@ pub fn sum(input: Vec<u8>) -> Vec<u8> {
 
     let result_keccak256_2 = result_keccak256_1.clone();
 
-    let lyra2result = lyra2::sum(32, result_keccak256_1, result_keccak256_2, 1, 8, 8);
+    let result_lyra2 = lyra2::lyra2(32, result_keccak256_1, result_keccak256_2, 1, 8, 8);
 
-    let result_skein = skein_hash::Skein512::<U32>::digest(&lyra2result);
+    let result_skein = skein_hash::Skein512::<U32>::digest(&result_lyra2);
 
     let mut groestl = Groestl256::new();
     groestl.input(result_skein);

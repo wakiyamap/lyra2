@@ -215,18 +215,15 @@ fn absorb_block_blake2_safe(mut s: [u64; 16], w: Vec<u64>) -> [u64; 16] {
 // integer parameters (treated as type "unsigned int") in the order they are provided, plus the value
 // of n_cols, (i.e., basil = kLen || pwdlen || saltlen || timeCost || n_rows || n_cols).
 //
-// @param K The derived key to be output by the algorithm
-// @param kLen Desired key length
+// @param K The derived key to be output size by the algorithm
 // @param pwd User password
-// @param pwdlen Password length
 // @param salt Salt
-// @param saltlen Salt length
 // @param time_cost Parameter to determine the processing time (T)
 // @param n_rows Number or rows of the memory matrix (R)
 // @param n_cols Number of columns of the memory matrix (C)
 //
 // @return 0 if the key is generated correctly; -1 if there is an error (usually due to lack of memory for allocation)
-pub fn sum(
+pub fn lyra2(
     k: u64,
     pwd: Vec<u8>,
     salt: Vec<u8>,
@@ -634,11 +631,16 @@ pub fn sum(
     //==========================================================================/
 }
 
+pub fn sum(input: Vec<u8>) -> Vec<u8> {
+    let input2 = input.clone();
+    let output = lyra2(32, input, input2, 1, 4, 4);
+    return output
+}
+
 #[test]
 fn lyra2_hash_cal() {
     let base1 = "abc".as_bytes().to_vec();
-    let base2 = base1.clone();
-    let lyra2_result1 = sum(32, base1, base2, 1, 4, 4);
+    let lyra2_result1 = sum(base1);
     assert_eq!(
         "8f63758bd178f014ea3fd4df09ff0a61646dc574a0b6bcf2890ec529a6a7360c",
         lyra2_result1
@@ -649,12 +651,12 @@ fn lyra2_hash_cal() {
 
     let base3 = "脇山珠美ちゃん可愛い！".as_bytes().to_vec();
     let base4 = base3.clone();
-    let lyra2_result2 = sum(48, base3, base4, 1, 3, 4);
+    let lyra2_result2 = lyra2(48, base3, base4, 1, 3, 4);
     assert_eq!("1bd5e9731a0f6475b3c2add5358f0d1eeac66f3f5d5b4d2346fbae196757a6e00193671974128a18af696313f07310b7", lyra2_result2.iter().map(|n| format!("{:02x}", n)).collect::<String>());
 
     let base5 = "😀😁😂".as_bytes().to_vec();
     let base6 = base5.clone();
-    let lyra2_result3 = sum(16, base5, base6, 1, 4, 2);
+    let lyra2_result3 = lyra2(16, base5, base6, 1, 4, 2);
     assert_eq!(
         "372557ef600c8c76bedd91ecd5a01f45",
         lyra2_result3

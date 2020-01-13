@@ -13,7 +13,7 @@ extern crate lyra2;
 fn main() {
     let base1 = "abc".as_bytes().to_vec();
     let base2 = base1.clone();
-    let lyra2_result1 = lyra2::lyra2::sum(32, base1, base2, 1, 4, 4);
+    let lyra2_result1 = lyra2::lyra2::lyra2(32, base1, base2, 1, 4, 4);
     println!("result: {:?}", lyra2_result1); 
     //result: [143, 99, 117, 139, 209, 120, 240, 20, 234, 63, 212, 223, 9, 255, 10, 97, 100, 109, 197, 116, 160, 182, 188, 242, 137, 14, 197, 41, 166, 167, 54, 12]
 }

@@ -226,7 +226,7 @@ fn absorb_block_blake2_safe(mut s: [u64; 16], w: Vec<u64>) -> [u64; 16] {
 // @param n_cols Number of columns of the memory matrix (C)
 //
 // @return 0 if the key is generated correctly; -1 if there is an error (usually due to lack of memory for allocation)
-pub fn sum(
+pub fn lyra2mod(
     k: u64,
     pwd: Vec<u8>,
     salt: Vec<u8>,
@@ -636,11 +636,16 @@ pub fn sum(
     //==========================================================================/
 }
 
+pub fn sum(input: Vec<u8>) -> Vec<u8> {
+    let input2 = input.clone();
+    let output = lyra2mod(32, input, input2, 1, 4, 4);
+    return output
+}
+
 #[test]
 fn lyra2mod_hash_cal() {
     let base1 = "abc".as_bytes().to_vec();
-    let base2 = base1.clone();
-    let lyra2mod_result1 = sum(32, base1, base2, 1, 4, 4);
+    let lyra2mod_result1 = sum(base1);
     assert_eq!(
         "0c36444f2885b72f3528af3b1f59174f8fd5c20b712988306962784c5f8ac462",
         lyra2mod_result1
@@ -651,12 +656,12 @@ fn lyra2mod_hash_cal() {
 
     let base3 = "脇山珠美ちゃん可愛い！".as_bytes().to_vec();
     let base4 = base3.clone();
-    let lyra2mod_result2 = sum(48, base3, base4, 1, 3, 4);
+    let lyra2mod_result2 = lyra2mod(48, base3, base4, 1, 3, 4);
     assert_eq!("8829c88abb22c71d303caddd7dbd633129c0a1f7300337cfc3af7d28ad8e49d0d7e1b54c0b62f6ada1e972eecbc37b2d", lyra2mod_result2.iter().map(|n| format!("{:02x}", n)).collect::<String>());
 
     let base5 = "😀😁😂".as_bytes().to_vec();
     let base6 = base5.clone();
-    let lyra2mod_result3 = sum(16, base5, base6, 1, 4, 2);
+    let lyra2mod_result3 = lyra2mod(16, base5, base6, 1, 4, 2);
     assert_eq!(
         "3cd143a8903f35aa32fbe9395706cfd6",
         lyra2mod_result3
