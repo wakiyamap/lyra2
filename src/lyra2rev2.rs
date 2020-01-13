@@ -17,9 +17,9 @@ pub fn sum(input: Vec<u8>) -> Vec<u8> {
 
     let result_cube = cubehash::sum(result_keccak256.to_vec());
 
-    let lyra2result = lyra2::sum(result_cube);
+    let result_lyra2 = lyra2::sum(result_cube);
 
-    let result_skein = skein_hash::Skein512::<U32>::digest(&lyra2result);
+    let result_skein = skein_hash::Skein512::<U32>::digest(&result_lyra2);
 
     let result_cube3 = cubehash::sum(result_skein.to_vec());
 
