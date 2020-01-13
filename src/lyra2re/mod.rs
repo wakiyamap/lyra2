@@ -28,32 +28,32 @@ pub fn sum(input: Vec<u8>) -> Vec<u8> {
 }
 
 #[test]
-fn lyra2rev3_hash_cal() {
+fn lyra2re_hash_cal() {
     let base1 = "abc".as_bytes().to_vec();
-    let lyra2rev3_result1 = sum(base1);
+    let lyra2re_result1 = sum(base1);
     assert_eq!(
         "07d3fe93103f6ad4284ad389d4b0a80334c94f5ffd0a537dfc935b3625552317",
-        lyra2rev3_result1
+        lyra2re_result1
             .iter()
             .map(|n| format!("{:02x}", n))
             .collect::<String>()
     );
 
     let base2 = "脇山珠美ちゃん可愛い！".as_bytes().to_vec();
-    let lyra2rev3_result2 = sum(base2);
+    let lyra2re_result2 = sum(base2);
     assert_eq!(
         "dfcbbb6c85f5c8215b340caf8cac46b605c85b6c05403eaddc9dfc66750929e1",
-        lyra2rev3_result2
+        lyra2re_result2
             .iter()
             .map(|n| format!("{:02x}", n))
             .collect::<String>()
     );
 
     let base3 = "😀😁😂".as_bytes().to_vec();
-    let lyra2rev3_result3 = sum(base3);
+    let lyra2re_result3 = sum(base3);
     assert_eq!(
         "c3afc6db9914ab54f95ddd3daeee4f43f960d431a845de7dcae18544b14e8b8b",
-        lyra2rev3_result3
+        lyra2re_result3
             .iter()
             .map(|n| format!("{:02x}", n))
             .collect::<String>()
