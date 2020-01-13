@@ -298,7 +298,7 @@ pub fn sum(
 
     //Now comes the padding
     whole_matrix[ptr_byte] = 0x80; //first byte of padding: right after the password
-    //resets the pointer to the start of the memory matrix
+                                   //resets the pointer to the start of the memory matrix
     ptr_byte = ((n_blocks_input * BLOCKLENBLAKE2SAFEBYTES) / 8 - 1) as usize; //sets the pointer to the correct position: end of incomplete block
     whole_matrix[ptr_byte] ^= 0x0100000000000000; //last byte of padding: at the end of the last incomplete block00
     //==========================================================================/
