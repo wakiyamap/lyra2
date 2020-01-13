@@ -18,7 +18,7 @@ const BLOCKLENBLAKE2SAFEBYTES: u64 = (BLOCKLENBLAKE2SAFEINT64 * 8); //same as ab
 
 /*Blake2b's rotation*/
 fn rotr64(w: u64, c: u8) -> u64 {
-    return (w >> c) | (w << (64 - c));
+    (w >> c) | (w << (64 - c))
 }
 
 /*g is Blake2b's G function*/
@@ -32,7 +32,7 @@ fn g(a: u64, b: u64, c: u64, d: u64) -> [u64; 4] {
     abcd[3] = rotr64(abcd[3] ^ abcd[0], 16);
     abcd[2] = abcd[2].wrapping_add(abcd[3]);
     abcd[1] = rotr64(abcd[1] ^ abcd[2], 63);
-    return abcd;
+    abcd
 }
 
 /*round_lyra is One Round of the Blake2b's compression function*/
@@ -77,7 +77,7 @@ fn round_lyra(mut v: [u64; 16]) -> [u64; 16] {
     v[4] = abcd[1];
     v[9] = abcd[2];
     v[14] = abcd[3];
-    return v;
+    v
 }
 
 /**
@@ -101,7 +101,7 @@ fn init_state() -> [u64; 16] {
     s[13] = BLAKE2BIV[5];
     s[14] = BLAKE2BIV[6];
     s[15] = BLAKE2BIV[7];
-    return s;
+    s
 }
 
 /**
@@ -122,7 +122,7 @@ fn blake2b_lyra(mut v: [u64; 16]) -> [u64; 16] {
     v = round_lyra(v);
     v = round_lyra(v);
     v = round_lyra(v);
-    return v;
+    v
 }
 
 /**
@@ -131,7 +131,7 @@ fn blake2b_lyra(mut v: [u64; 16]) -> [u64; 16] {
  */
 fn reduced_blake2b_lyra(mut v: [u64; 16]) -> [u64; 16] {
     v = round_lyra(v);
-    return v;
+    v
 }
 
 /**
@@ -152,12 +152,10 @@ fn squeeze(mut state: [u64; 16], output_size: u64) -> Vec<u8> {
             tmp.extend_from_slice(&state[_i as usize].to_le_bytes());
         }
         //be care in case of len(out[i:])<len(tmp)
-        for _i in 0..output_size as usize {
-            out[_i] = tmp[_i];
-        }
+        out[..output_size as usize].clone_from_slice(&tmp[..output_size as usize]);
         state = blake2b_lyra(state);
     }
-    return out;
+    out
 }
 
 /**
@@ -184,7 +182,7 @@ fn absorb_block(mut s: [u64; 16], w: Vec<u64>) -> [u64; 16] {
 
     //Applies the transformation f to the sponge's state
     s = blake2b_lyra(s);
-    return s;
+    s
 }
 
 /**
@@ -206,7 +204,7 @@ fn absorb_block_blake2_safe(mut s: [u64; 16], w: Vec<u64>) -> [u64; 16] {
     s[7] ^= w[7];
     //Applies the transformation f to the sponge's state
     s = blake2b_lyra(s);
-    return s;
+    s
 }
 
 // lyra2 Executes Lyra2 based on the G function from Blake2b. This version supports salts and passwords
@@ -300,7 +298,7 @@ pub fn lyra2mod(
     whole_matrix[ptr_byte] = 0x80; //first byte of padding: right after the password
                                    //resets the pointer to the start of the memory matrix
     ptr_byte = ((n_blocks_input * BLOCKLENBLAKE2SAFEBYTES) / 8 - 1) as usize; //sets the pointer to the correct position: end of incomplete block
-    whole_matrix[ptr_byte] ^= 0x0100000000000000; //last byte of padding: at the end of the last incomplete block00
+    whole_matrix[ptr_byte] ^= 0x0100_0000_0000_0000; //last byte of padding: at the end of the last incomplete block00
     //==========================================================================/
 
     //======================= Initializing the Sponge State ====================//
@@ -390,7 +388,7 @@ pub fn lyra2mod(
             whole_matrix[(_i * BLOCKLENINT64 + 11) as usize] ^ state[11];
     }
 
-    let mut _x = row.clone();
+    let mut _x = row;
     for _x in _x..n_rows {
         //M[row] = rand; //M[row*] = M[row*] XOR rotW(rand)
         //reducedDuplexRowSetup
@@ -494,7 +492,7 @@ pub fn lyra2mod(
         //update prev: it now points to the last row ever computed
         prev = row;
         //updates row: goes to the next row to be computed
-        row = row + 1;
+        row += 1;
 
         //Checks if all rows in the window where visited.
         if rowa == 0 {
@@ -508,7 +506,7 @@ pub fn lyra2mod(
     //============================ Wandering Phase =============================//
     let mut index: u64 = 0;
     row = 0; //Resets the visitation to the first row of the memory matrix
-    for _tau in 1..time_cost + 1 {
+    for _tau in 1..=time_cost {
         //Step is approximately half the number of all rows of the memory matrix for an odd _tau; otherwise, it is -1
         step = n_rows as i32 / 2 - 1;
         if _tau % 2 == 0 {
@@ -631,15 +629,13 @@ pub fn lyra2mod(
     let (_, mut _right) = &whole_matrix.split_at((rowa * row_len_int64) as usize);
     state = absorb_block(state, _right.to_vec());
     //Squeezes the key
-    let result = squeeze(state, k);
-    return result;
+    squeeze(state, k)
     //==========================================================================/
 }
 
 pub fn sum(input: Vec<u8>) -> Vec<u8> {
     let input2 = input.clone();
-    let output = lyra2mod(32, input, input2, 1, 4, 4);
-    return output
+    lyra2mod(32, input, input2, 1, 4, 4)
 }
 
 #[test]

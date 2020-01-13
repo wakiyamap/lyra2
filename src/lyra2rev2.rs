@@ -23,8 +23,7 @@ pub fn sum(input: Vec<u8>) -> Vec<u8> {
 
     let result_cube3 = cubehash::sum(result_skein.to_vec());
 
-    let result_bmw = bmw::sum(result_cube3);
-    return result_bmw;
+    bmw::sum(result_cube3)
 }
 
 #[test]

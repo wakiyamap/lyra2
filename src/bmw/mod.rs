@@ -39,7 +39,7 @@ const FINAL: [u32; 16] = [
 ];
 
 fn circular_left(x: u32, n: u32) -> u32 {
-    return (x << n) | (x >> (32 - n));
+    (x << n) | (x >> (32 - n))
 }
 
 struct Bmw {
@@ -72,7 +72,7 @@ fn new() -> Bmw {
     b.h[13] = INITVAL[13];
     b.h[14] = INITVAL[14];
     b.h[15] = INITVAL[15];
-    return b;
+    b
 }
 
 fn compress(mut b: Bmw, m: [u32; 16]) -> Bmw {
@@ -523,7 +523,7 @@ fn compress(mut b: Bmw, m: [u32; 16]) -> Bmw {
             (circular_left(m[0], 1)
                 .wrapping_add(circular_left(m[3], 4))
                 .wrapping_sub(circular_left(m[10], 11))
-                .wrapping_add(16 * 0x05555555))
+                .wrapping_add(16 * 0x0555_5555))
                 ^ h[7],
         );
     q[17] = ((q[1] >> 1) ^ (q[1] << 2) ^ circular_left(q[1], 8) ^ circular_left(q[1], 23))
@@ -560,7 +560,7 @@ fn compress(mut b: Bmw, m: [u32; 16]) -> Bmw {
             (circular_left(m[1], 2)
                 .wrapping_add(circular_left(m[4], 5))
                 .wrapping_sub(circular_left(m[11], 12))
-                .wrapping_add(17 * 0x05555555))
+                .wrapping_add(17 * 0x0555_5555))
                 ^ h[8],
         );
     q[18] = q[2]
@@ -583,7 +583,7 @@ fn compress(mut b: Bmw, m: [u32; 16]) -> Bmw {
             (circular_left(m[2], 3)
                 .wrapping_add(circular_left(m[5], 6))
                 .wrapping_sub(circular_left(m[12], 13))
-                .wrapping_add(18 * 0x05555555))
+                .wrapping_add(18 * 0x0555_5555))
                 ^ h[9],
         );
     q[19] = q[3]
@@ -606,7 +606,7 @@ fn compress(mut b: Bmw, m: [u32; 16]) -> Bmw {
             (circular_left(m[3], 4)
                 .wrapping_add(circular_left(m[6], 7))
                 .wrapping_sub(circular_left(m[13], 14))
-                .wrapping_add(19 * 0x05555555))
+                .wrapping_add(19 * 0x0555_5555))
                 ^ h[10],
         );
     q[20] = q[4]
@@ -629,7 +629,7 @@ fn compress(mut b: Bmw, m: [u32; 16]) -> Bmw {
             (circular_left(m[4], 5)
                 .wrapping_add(circular_left(m[7], 8))
                 .wrapping_sub(circular_left(m[14], 15))
-                .wrapping_add(20 * 0x05555555))
+                .wrapping_add(20 * 0x0555_5555))
                 ^ h[11],
         );
     q[21] = q[5]
@@ -652,7 +652,7 @@ fn compress(mut b: Bmw, m: [u32; 16]) -> Bmw {
             (circular_left(m[5], 6)
                 .wrapping_add(circular_left(m[8], 9))
                 .wrapping_sub(circular_left(m[15], 16))
-                .wrapping_add(21 * 0x05555555))
+                .wrapping_add(21 * 0x0555_5555))
                 ^ h[12],
         );
     q[22] = q[6]
@@ -675,7 +675,7 @@ fn compress(mut b: Bmw, m: [u32; 16]) -> Bmw {
             (circular_left(m[6], 7)
                 .wrapping_add(circular_left(m[9], 10))
                 .wrapping_sub(circular_left(m[0], 1))
-                .wrapping_add(22 * 0x05555555))
+                .wrapping_add(22 * 0x0555_5555))
                 ^ h[13],
         );
     q[23] = q[7]
@@ -698,7 +698,7 @@ fn compress(mut b: Bmw, m: [u32; 16]) -> Bmw {
             (circular_left(m[7], 8)
                 .wrapping_add(circular_left(m[10], 11))
                 .wrapping_sub(circular_left(m[1], 2))
-                .wrapping_add(23 * 0x05555555))
+                .wrapping_add(23 * 0x0555_5555))
                 ^ h[14],
         );
     q[24] = q[8]
@@ -721,7 +721,7 @@ fn compress(mut b: Bmw, m: [u32; 16]) -> Bmw {
             (circular_left(m[8], 9)
                 .wrapping_add(circular_left(m[11], 12))
                 .wrapping_sub(circular_left(m[2], 3))
-                .wrapping_add(24 * 0x05555555))
+                .wrapping_add(24 * 0x0555_5555))
                 ^ h[15],
         );
     q[25] = q[9]
@@ -744,7 +744,7 @@ fn compress(mut b: Bmw, m: [u32; 16]) -> Bmw {
             (circular_left(m[9], 10)
                 .wrapping_add(circular_left(m[12], 13))
                 .wrapping_sub(circular_left(m[3], 4))
-                .wrapping_add(25 * 0x05555555))
+                .wrapping_add(25 * 0x0555_5555))
                 ^ h[0],
         );
     q[26] = q[10]
@@ -767,7 +767,7 @@ fn compress(mut b: Bmw, m: [u32; 16]) -> Bmw {
             (circular_left(m[10], 11)
                 .wrapping_add(circular_left(m[13], 14))
                 .wrapping_sub(circular_left(m[4], 5))
-                .wrapping_add(26 * 0x05555555))
+                .wrapping_add(26 * 0x0555_5555))
                 ^ h[1],
         );
     q[27] = q[11]
@@ -790,7 +790,7 @@ fn compress(mut b: Bmw, m: [u32; 16]) -> Bmw {
             (circular_left(m[11], 12)
                 .wrapping_add(circular_left(m[14], 15))
                 .wrapping_sub(circular_left(m[5], 6))
-                .wrapping_add(27 * 0x05555555))
+                .wrapping_add(27 * 0x0555_5555))
                 ^ h[2],
         );
     q[28] = q[12]
@@ -813,7 +813,7 @@ fn compress(mut b: Bmw, m: [u32; 16]) -> Bmw {
             (circular_left(m[12], 13)
                 .wrapping_add(circular_left(m[15], 16))
                 .wrapping_sub(circular_left(m[6], 7))
-                .wrapping_add(28 * 0x05555555))
+                .wrapping_add(28 * 0x0555_5555))
                 ^ h[3],
         );
     q[29] = q[13]
@@ -836,7 +836,7 @@ fn compress(mut b: Bmw, m: [u32; 16]) -> Bmw {
             (circular_left(m[13], 14)
                 .wrapping_add(circular_left(m[0], 1))
                 .wrapping_sub(circular_left(m[7], 8))
-                .wrapping_add(29 * 0x05555555))
+                .wrapping_add(29 * 0x0555_5555))
                 ^ h[4],
         );
     q[30] = q[14]
@@ -859,7 +859,7 @@ fn compress(mut b: Bmw, m: [u32; 16]) -> Bmw {
             (circular_left(m[14], 15)
                 .wrapping_add(circular_left(m[1], 2))
                 .wrapping_sub(circular_left(m[8], 9))
-                .wrapping_add(30 * 0x05555555))
+                .wrapping_add(30 * 0x0555_5555))
                 ^ h[5],
         );
     q[31] = q[15]
@@ -882,7 +882,7 @@ fn compress(mut b: Bmw, m: [u32; 16]) -> Bmw {
             (circular_left(m[15], 16)
                 .wrapping_add(circular_left(m[2], 3))
                 .wrapping_sub(circular_left(m[9], 10))
-                .wrapping_add(31 * 0x05555555))
+                .wrapping_add(31 * 0x0555_5555))
                 ^ h[6],
         );
     let xl = q[16] ^ q[17] ^ q[18] ^ q[19] ^ q[20] ^ q[21] ^ q[22] ^ q[23];
@@ -919,15 +919,9 @@ fn compress(mut b: Bmw, m: [u32; 16]) -> Bmw {
     h[15] = circular_left(h[3], 16)
         .wrapping_add(xh ^ q[31] ^ m[15])
         .wrapping_add((xl >> 2) ^ q[22] ^ q[15]);
-    let mut _i = 0;
-    for _i in 0..16 {
-        b.h[_i] = h[_i];
-    }
-    let mut _i = 0;
-    for _i in 0..32 {
-        b.q[_i] = q[_i];
-    }
-    return b;
+    b.h[..16].clone_from_slice(&h[..16]);
+    b.q[..32].clone_from_slice(&q[..32]);
+    b
 }
 
 //sum calculates bmw256.
@@ -935,11 +929,12 @@ fn compress(mut b: Bmw, m: [u32; 16]) -> Bmw {
 pub fn sum(input: Vec<u8>) -> Vec<u8> {
     let mut b = new();
     let mut buf: Vec<u8> = Vec::with_capacity(64);
-    for _i in 0..input.len() {
-        buf.push(input[_i]);
-    }
-    for _i in input.len()..64 {
-        buf.push(0);
+    for _i in 0..64 {
+        if _i < input.len() {
+            buf.push(input[_i]);
+        } else {
+            buf.push(0);
+        }
     }
     buf[input.len() as usize] = 0x80;
     let bit_len = ((input.len() as u64) << 3).to_le_bytes();
@@ -959,11 +954,8 @@ pub fn sum(input: Vec<u8>) -> Vec<u8> {
     let m = b.m;
     let mut b = compress(b, m);
     let h = b.h;
-    let mut _i = 0;
-    for _i in 0..16 {
-        b.h2[_i] = h[_i];
-        b.h[_i] = FINAL[_i];
-    }
+    b.h2[..16].clone_from_slice(&h[..16]);
+    b.h[..16].clone_from_slice(&FINAL[..16]);
     let h2 = b.h2;
     let b = compress(b, h2);
     let mut out = vec![];
@@ -975,7 +967,7 @@ pub fn sum(input: Vec<u8>) -> Vec<u8> {
     out.extend_from_slice(&b.h[13].to_le_bytes());
     out.extend_from_slice(&b.h[14].to_le_bytes());
     out.extend_from_slice(&b.h[15].to_le_bytes());
-    return out;
+    out
 }
 
 #[test]

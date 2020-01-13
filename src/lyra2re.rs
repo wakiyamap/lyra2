@@ -24,7 +24,7 @@ pub fn sum(input: Vec<u8>) -> Vec<u8> {
     groestl.input(result_skein);
     let result_groestl256 = groestl.result();
 
-    return result_groestl256.to_vec();
+    result_groestl256.to_vec()
 }
 
 #[test]

@@ -15,8 +15,7 @@ pub fn sum(input: Vec<u8>) -> Vec<u8> {
 
     let result_lyra2_mod_2 = lyra2mod::sum(result_cube);
 
-    let result_bmw = bmw::sum(result_lyra2_mod_2);
-    return result_bmw;
+    bmw::sum(result_lyra2_mod_2)
 }
 
 #[test]

@@ -71,7 +71,7 @@ struct CubeHash {
 }
 
 fn new_cube_hash() -> CubeHash {
-    let c = CubeHash {
+    CubeHash {
         x0: IV[0],
         x1: IV[1],
         x2: IV[2],
@@ -104,8 +104,7 @@ fn new_cube_hash() -> CubeHash {
         xt: IV[29],
         xu: IV[30],
         xv: IV[31],
-    };
-    return c;
+    }
 }
 
 fn input_block(data: Vec<u8>, mut c: CubeHash) -> CubeHash {
@@ -125,7 +124,7 @@ fn input_block(data: Vec<u8>, mut c: CubeHash) -> CubeHash {
     c.x6 ^= LittleEndian::read_u32(_right);
     let (_, mut _right) = &data.split_at(28);
     c.x7 ^= LittleEndian::read_u32(_right);
-    return c;
+    c
 }
 
 fn sixteen_rounds(mut c: CubeHash) -> CubeHash {
@@ -325,7 +324,7 @@ fn sixteen_rounds(mut c: CubeHash) -> CubeHash {
         c.xe ^= c.xv;
         c.xf ^= c.xu;
     }
-    return c;
+    c
 }
 
 //cubehash256 calculates cubuhash256.
@@ -356,7 +355,7 @@ pub fn sum(data: Vec<u8>) -> Vec<u8> {
     out.extend_from_slice(&c.x5.to_le_bytes());
     out.extend_from_slice(&c.x6.to_le_bytes());
     out.extend_from_slice(&c.x7.to_le_bytes());
-    return out;
+    out
 }
 
 #[test]
