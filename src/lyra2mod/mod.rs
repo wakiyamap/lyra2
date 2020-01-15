@@ -615,7 +615,7 @@ pub fn lyra2mod(
             //updates row: goes to the next row to be computed
             //------------------------------------------------------------------------------------------
             //row = (row + step) & (n_rows-1);	//(USE THIS IF n_rows IS A POWER OF 2)
-            row = (row + step as u64) % n_rows; //(USE THIS FOR THE "GENERIC" CASE)
+            row = (row as i32 + step) as u64 % n_rows; //(USE THIS FOR THE "GENERIC" CASE)
             //------------------------------------------------------------------------------------------
             if row == 0 {
                 row0 = true;
