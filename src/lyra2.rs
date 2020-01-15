@@ -11,10 +11,10 @@ const BLAKE2BIV: [u64; 8] = [
     0x5be0_cd19_137e_2179,
 ];
 
-const BLOCKLENINT64: u64 = 12; //Block length: 768 bits (=96 bytes, =12 uint64_t)
-const BLOCKLENBYTES: u64 = BLOCKLENINT64 * 8; //Block length, in bytes
-const BLOCKLENBLAKE2SAFEINT64: u64 = 8; //512 bits (=64 bytes, =8 uint64_t)
-const BLOCKLENBLAKE2SAFEBYTES: u64 = (BLOCKLENBLAKE2SAFEINT64 * 8); //same as above, in bytes
+const BLOCKLENINT64: i64 = 12; //Block length: 768 bits (=96 bytes, =12 uint64_t)
+const BLOCKLENBYTES: i64 = BLOCKLENINT64 * 8; //Block length, in bytes
+const BLOCKLENBLAKE2SAFEINT64: i64 = 8; //512 bits (=64 bytes, =8 uint64_t)
+const BLOCKLENBLAKE2SAFEBYTES: i64 = (BLOCKLENBLAKE2SAFEINT64 * 8); //same as above, in bytes
 
 /*Blake2b's rotation*/
 fn rotr64(w: u64, c: u8) -> u64 {
@@ -146,7 +146,7 @@ fn squeeze(mut state: [u64; 16], output_size: u64) -> Vec<u8> {
     let mut tmp = vec![];
     let mut out = vec![0; output_size as usize];
     let mut _j = 0;
-    let jmax = output_size / BLOCKLENBYTES + 1;
+    let jmax = output_size as i64 / BLOCKLENBYTES + 1;
     for _j in 0..jmax {
         for _i in 0..BLOCKLENINT64 {
             tmp.extend_from_slice(&state[_i as usize].to_le_bytes());
@@ -230,21 +230,21 @@ pub fn lyra2(
     n_cols: u64,
 ) -> Vec<u8> {
     //============================= Basic variables ============================//
-    let mut row: u64 = 2; //index of row to be processed
-    let mut prev: u64 = 1; //index of prev (last row ever computed/modified)
-    let mut rowa: u64 = 0; //index of row* (a previous row, deterministically picked during Setup and randomly picked while Wandering)
-    let mut _tau: u64 = 1; //Time Loop iterator
-    let mut step: i32 = 1; //Visitation step (used during Setup and Wandering phases)
-    let mut window: u64 = 2; //Visitation window (used to define which rows can be revisited during Setup)
-    let mut gap: i32 = 1; //Modifier to the step, assuming the values 1 or -1
-    let mut _i: u64 = 0; //auxiliary iteration counter
+    let mut row: i64 = 2; //index of row to be processed
+    let mut prev: i64 = 1; //index of prev (last row ever computed/modified)
+    let mut rowa: i64 = 0; //index of row* (a previous row, deterministically picked during Setup and randomly picked while Wandering)
+    let mut _tau: i64 = 1; //Time Loop iterator
+    let mut step: i64 = 1; //Visitation step (used during Setup and Wandering phases)
+    let mut window: i64 = 2; //Visitation window (used to define which rows can be revisited during Setup)
+    let mut gap: i64 = 1; //Modifier to the step, assuming the values 1 or -1
+    let mut _i: i64 = 0; //auxiliary iteration counter
     //==========================================================================/
 
     //========== Initializing the Memory Matrix and pointers to it =============//
     //Tries to allocate enough space for the whole memory matrix
 
-    let row_len_int64: u64 = BLOCKLENINT64 * n_cols;
-    let mut _i: u64 = n_rows * row_len_int64;
+    let row_len_int64: i64 = BLOCKLENINT64 * n_cols as i64;
+    let mut _i: i64 = n_rows as i64 * row_len_int64;
     let mut whole_matrix: Vec<u64> = Vec::new();
     whole_matrix.resize(_i as usize, 0);
 
@@ -255,8 +255,8 @@ pub fn lyra2(
     //but this ensures that the password copied locally will be overwritten as soon as possible
 
     //First, we clean enough blocks for the password, salt, basil and padding
-    let n_blocks_input: u64 =
-        ((salt.len() as u64 + pwd.len() as u64 + 6 * 8) / BLOCKLENBLAKE2SAFEBYTES) + 1;
+    let n_blocks_input: i64 =
+        ((salt.len() + pwd.len() + 6 * 8) as i64 / BLOCKLENBLAKE2SAFEBYTES) + 1;
     let mut ptr_byte: usize = 0; // (byte*) whole_matrix;
 
     //Prepends the password
@@ -315,7 +315,7 @@ pub fn lyra2(
     //Initializes M[0] and M[1]
     //reducedSqueezeRow0
     //The locally copied password is most likely overwritten here
-    let mut ptr = (n_cols - 1) * BLOCKLENINT64;
+    let mut ptr = (n_cols as i64 - 1) * BLOCKLENINT64;
     //M[row][C-1-col] = H.reduced_squeeze()
     for _i in 0..n_cols {
         //In Lyra2: pointer to M[0][C-1]
@@ -342,150 +342,150 @@ pub fn lyra2(
     //reducedDuplexRow1
     for _i in 0..n_cols {
         //Absorbing "M[prev][col]"
-        state[0] ^= whole_matrix[(_i * BLOCKLENINT64 + 0) as usize];
-        state[1] ^= whole_matrix[(_i * BLOCKLENINT64 + 1) as usize];
-        state[2] ^= whole_matrix[(_i * BLOCKLENINT64 + 2) as usize];
-        state[3] ^= whole_matrix[(_i * BLOCKLENINT64 + 3) as usize];
-        state[4] ^= whole_matrix[(_i * BLOCKLENINT64 + 4) as usize];
-        state[5] ^= whole_matrix[(_i * BLOCKLENINT64 + 5) as usize];
-        state[6] ^= whole_matrix[(_i * BLOCKLENINT64 + 6) as usize];
-        state[7] ^= whole_matrix[(_i * BLOCKLENINT64 + 7) as usize];
-        state[8] ^= whole_matrix[(_i * BLOCKLENINT64 + 8) as usize];
-        state[9] ^= whole_matrix[(_i * BLOCKLENINT64 + 9) as usize];
-        state[10] ^= whole_matrix[(_i * BLOCKLENINT64 + 10) as usize];
-        state[11] ^= whole_matrix[(_i * BLOCKLENINT64 + 11) as usize];
+        state[0] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + 0) as usize];
+        state[1] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + 1) as usize];
+        state[2] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + 2) as usize];
+        state[3] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + 3) as usize];
+        state[4] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + 4) as usize];
+        state[5] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + 5) as usize];
+        state[6] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + 6) as usize];
+        state[7] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + 7) as usize];
+        state[8] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + 8) as usize];
+        state[9] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + 9) as usize];
+        state[10] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + 10) as usize];
+        state[11] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + 11) as usize];
 
         //Applies the reduced-round transformation f to the sponge's state
         state = reduced_blake2b_lyra(state);
 
         //M[row][C-1-col] = M[prev][col] XOR rand
-        whole_matrix[((n_cols - _i - 1) * BLOCKLENINT64 + row_len_int64 + 0) as usize] =
-            whole_matrix[(_i * BLOCKLENINT64 + 0) as usize] ^ state[0];
-        whole_matrix[((n_cols - _i - 1) * BLOCKLENINT64 + row_len_int64 + 1) as usize] =
-            whole_matrix[(_i * BLOCKLENINT64 + 1) as usize] ^ state[1];
-        whole_matrix[((n_cols - _i - 1) * BLOCKLENINT64 + row_len_int64 + 2) as usize] =
-            whole_matrix[(_i * BLOCKLENINT64 + 2) as usize] ^ state[2];
-        whole_matrix[((n_cols - _i - 1) * BLOCKLENINT64 + row_len_int64 + 3) as usize] =
-            whole_matrix[(_i * BLOCKLENINT64 + 3) as usize] ^ state[3];
-        whole_matrix[((n_cols - _i - 1) * BLOCKLENINT64 + row_len_int64 + 4) as usize] =
-            whole_matrix[(_i * BLOCKLENINT64 + 4) as usize] ^ state[4];
-        whole_matrix[((n_cols - _i - 1) * BLOCKLENINT64 + row_len_int64 + 5) as usize] =
-            whole_matrix[(_i * BLOCKLENINT64 + 5) as usize] ^ state[5];
-        whole_matrix[((n_cols - _i - 1) * BLOCKLENINT64 + row_len_int64 + 6) as usize] =
-            whole_matrix[(_i * BLOCKLENINT64 + 6) as usize] ^ state[6];
-        whole_matrix[((n_cols - _i - 1) * BLOCKLENINT64 + row_len_int64 + 7) as usize] =
-            whole_matrix[(_i * BLOCKLENINT64 + 7) as usize] ^ state[7];
-        whole_matrix[((n_cols - _i - 1) * BLOCKLENINT64 + row_len_int64 + 8) as usize] =
-            whole_matrix[(_i * BLOCKLENINT64 + 8) as usize] ^ state[8];
-        whole_matrix[((n_cols - _i - 1) * BLOCKLENINT64 + row_len_int64 + 9) as usize] =
-            whole_matrix[(_i * BLOCKLENINT64 + 9) as usize] ^ state[9];
-        whole_matrix[((n_cols - _i - 1) * BLOCKLENINT64 + row_len_int64 + 10) as usize] =
-            whole_matrix[(_i * BLOCKLENINT64 + 10) as usize] ^ state[10];
-        whole_matrix[((n_cols - _i - 1) * BLOCKLENINT64 + row_len_int64 + 11) as usize] =
-            whole_matrix[(_i * BLOCKLENINT64 + 11) as usize] ^ state[11];
+        whole_matrix[((n_cols - _i - 1) as i64 * BLOCKLENINT64 + row_len_int64 + 0) as usize] =
+            whole_matrix[(_i as i64 * BLOCKLENINT64 + 0) as usize] ^ state[0];
+        whole_matrix[((n_cols - _i - 1) as i64 * BLOCKLENINT64 + row_len_int64 + 1) as usize] =
+            whole_matrix[(_i as i64 * BLOCKLENINT64 + 1) as usize] ^ state[1];
+        whole_matrix[((n_cols - _i - 1) as i64 * BLOCKLENINT64 + row_len_int64 + 2) as usize] =
+            whole_matrix[(_i as i64 * BLOCKLENINT64 + 2) as usize] ^ state[2];
+        whole_matrix[((n_cols - _i - 1) as i64 * BLOCKLENINT64 + row_len_int64 + 3) as usize] =
+            whole_matrix[(_i as i64 * BLOCKLENINT64 + 3) as usize] ^ state[3];
+        whole_matrix[((n_cols - _i - 1) as i64 * BLOCKLENINT64 + row_len_int64 + 4) as usize] =
+            whole_matrix[(_i as i64 * BLOCKLENINT64 + 4) as usize] ^ state[4];
+        whole_matrix[((n_cols - _i - 1) as i64 * BLOCKLENINT64 + row_len_int64 + 5) as usize] =
+            whole_matrix[(_i as i64 * BLOCKLENINT64 + 5) as usize] ^ state[5];
+        whole_matrix[((n_cols - _i - 1) as i64 * BLOCKLENINT64 + row_len_int64 + 6) as usize] =
+            whole_matrix[(_i as i64 * BLOCKLENINT64 + 6) as usize] ^ state[6];
+        whole_matrix[((n_cols - _i - 1) as i64 * BLOCKLENINT64 + row_len_int64 + 7) as usize] =
+            whole_matrix[(_i as i64 * BLOCKLENINT64 + 7) as usize] ^ state[7];
+        whole_matrix[((n_cols - _i - 1) as i64 * BLOCKLENINT64 + row_len_int64 + 8) as usize] =
+            whole_matrix[(_i as i64 * BLOCKLENINT64 + 8) as usize] ^ state[8];
+        whole_matrix[((n_cols - _i - 1) as i64 * BLOCKLENINT64 + row_len_int64 + 9) as usize] =
+            whole_matrix[(_i as i64 * BLOCKLENINT64 + 9) as usize] ^ state[9];
+        whole_matrix[((n_cols - _i - 1) as i64 * BLOCKLENINT64 + row_len_int64 + 10) as usize] =
+            whole_matrix[(_i as i64 * BLOCKLENINT64 + 10) as usize] ^ state[10];
+        whole_matrix[((n_cols - _i - 1) as i64 * BLOCKLENINT64 + row_len_int64 + 11) as usize] =
+            whole_matrix[(_i as i64 * BLOCKLENINT64 + 11) as usize] ^ state[11];
     }
 
-    let mut _x = row;
-    for _x in _x..n_rows {
+    let mut _x: i64 = row;
+    for _x in _x..n_rows as i64 {
         //M[row] = rand; //M[row*] = M[row*] XOR rotW(rand)
         //reducedDuplexRowSetup
         for _i in 0..n_cols {
             //Absorbing "M[prev] [+] M[row*]"
-            state[0] ^= whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 0) as usize]
+            state[0] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 0) as usize]
                 .wrapping_add(
-                    whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 0) as usize],
+                    whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 0) as usize],
                 );
-            state[1] ^= whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 1) as usize]
+            state[1] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 1) as usize]
                 .wrapping_add(
-                    whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 1) as usize],
+                    whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 1) as usize],
                 );
-            state[2] ^= whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 2) as usize]
+            state[2] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 2) as usize]
                 .wrapping_add(
-                    whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 2) as usize],
+                    whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 2) as usize],
                 );
-            state[3] ^= whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 3) as usize]
+            state[3] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 3) as usize]
                 .wrapping_add(
-                    whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 3) as usize],
+                    whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 3) as usize],
                 );
-            state[4] ^= whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 4) as usize]
+            state[4] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 4) as usize]
                 .wrapping_add(
-                    whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 4) as usize],
+                    whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 4) as usize],
                 );
-            state[5] ^= whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 5) as usize]
+            state[5] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 5) as usize]
                 .wrapping_add(
-                    whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 5) as usize],
+                    whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 5) as usize],
                 );
-            state[6] ^= whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 6) as usize]
+            state[6] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 6) as usize]
                 .wrapping_add(
-                    whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 6) as usize],
+                    whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 6) as usize],
                 );
-            state[7] ^= whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 7) as usize]
+            state[7] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 7) as usize]
                 .wrapping_add(
-                    whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 7) as usize],
+                    whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 7) as usize],
                 );
-            state[8] ^= whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 8) as usize]
+            state[8] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 8) as usize]
                 .wrapping_add(
-                    whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 8) as usize],
+                    whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 8) as usize],
                 );
-            state[9] ^= whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 9) as usize]
+            state[9] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 9) as usize]
                 .wrapping_add(
-                    whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 9) as usize],
+                    whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 9) as usize],
                 );
-            state[10] ^= whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 10) as usize]
+            state[10] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 10) as usize]
                 .wrapping_add(
-                    whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 10) as usize],
+                    whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 10) as usize],
                 );
-            state[11] ^= whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 11) as usize]
+            state[11] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 11) as usize]
                 .wrapping_add(
-                    whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 11) as usize],
+                    whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 11) as usize],
                 );
 
             //Applies the reduced-round transformation f to the sponge's state
             state = reduced_blake2b_lyra(state);
 
             //M[row][col] = M[prev][col] XOR rand
-            whole_matrix[((n_cols - _i - 1) * BLOCKLENINT64 + row * row_len_int64 + 0) as usize] =
-                whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 0) as usize] ^ state[0];
-            whole_matrix[((n_cols - _i - 1) * BLOCKLENINT64 + row * row_len_int64 + 1) as usize] =
-                whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 1) as usize] ^ state[1];
-            whole_matrix[((n_cols - _i - 1) * BLOCKLENINT64 + row * row_len_int64 + 2) as usize] =
-                whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 2) as usize] ^ state[2];
-            whole_matrix[((n_cols - _i - 1) * BLOCKLENINT64 + row * row_len_int64 + 3) as usize] =
-                whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 3) as usize] ^ state[3];
-            whole_matrix[((n_cols - _i - 1) * BLOCKLENINT64 + row * row_len_int64 + 4) as usize] =
-                whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 4) as usize] ^ state[4];
-            whole_matrix[((n_cols - _i - 1) * BLOCKLENINT64 + row * row_len_int64 + 5) as usize] =
-                whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 5) as usize] ^ state[5];
-            whole_matrix[((n_cols - _i - 1) * BLOCKLENINT64 + row * row_len_int64 + 6) as usize] =
-                whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 6) as usize] ^ state[6];
-            whole_matrix[((n_cols - _i - 1) * BLOCKLENINT64 + row * row_len_int64 + 7) as usize] =
-                whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 7) as usize] ^ state[7];
-            whole_matrix[((n_cols - _i - 1) * BLOCKLENINT64 + row * row_len_int64 + 8) as usize] =
-                whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 8) as usize] ^ state[8];
-            whole_matrix[((n_cols - _i - 1) * BLOCKLENINT64 + row * row_len_int64 + 9) as usize] =
-                whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 9) as usize] ^ state[9];
-            whole_matrix[((n_cols - _i - 1) * BLOCKLENINT64 + row * row_len_int64 + 10) as usize] =
-                whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 10) as usize] ^ state[10];
-            whole_matrix[((n_cols - _i - 1) * BLOCKLENINT64 + row * row_len_int64 + 11) as usize] =
-                whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 11) as usize] ^ state[11];
+            whole_matrix[((n_cols - _i - 1) as i64 * BLOCKLENINT64 + row * row_len_int64 + 0) as usize] =
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 0) as usize] ^ state[0];
+            whole_matrix[((n_cols - _i - 1) as i64 * BLOCKLENINT64 + row * row_len_int64 + 1) as usize] =
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 1) as usize] ^ state[1];
+            whole_matrix[((n_cols - _i - 1) as i64 * BLOCKLENINT64 + row * row_len_int64 + 2) as usize] =
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 2) as usize] ^ state[2];
+            whole_matrix[((n_cols - _i - 1) as i64 * BLOCKLENINT64 + row * row_len_int64 + 3) as usize] =
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 3) as usize] ^ state[3];
+            whole_matrix[((n_cols - _i - 1) as i64 * BLOCKLENINT64 + row * row_len_int64 + 4) as usize] =
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 4) as usize] ^ state[4];
+            whole_matrix[((n_cols - _i - 1) as i64 * BLOCKLENINT64 + row * row_len_int64 + 5) as usize] =
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 5) as usize] ^ state[5];
+            whole_matrix[((n_cols - _i - 1) as i64 * BLOCKLENINT64 + row * row_len_int64 + 6) as usize] =
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 6) as usize] ^ state[6];
+            whole_matrix[((n_cols - _i - 1) as i64 * BLOCKLENINT64 + row * row_len_int64 + 7) as usize] =
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 7) as usize] ^ state[7];
+            whole_matrix[((n_cols - _i - 1) as i64 * BLOCKLENINT64 + row * row_len_int64 + 8) as usize] =
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 8) as usize] ^ state[8];
+            whole_matrix[((n_cols - _i - 1) as i64 * BLOCKLENINT64 + row * row_len_int64 + 9) as usize] =
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 9) as usize] ^ state[9];
+            whole_matrix[((n_cols - _i - 1) as i64 * BLOCKLENINT64 + row * row_len_int64 + 10) as usize] =
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 10) as usize] ^ state[10];
+            whole_matrix[((n_cols - _i - 1) as i64 * BLOCKLENINT64 + row * row_len_int64 + 11) as usize] =
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 11) as usize] ^ state[11];
 
             //M[row*][col] = M[row*][col] XOR rotW(rand)
-            whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 0) as usize] ^= state[11];
-            whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 1) as usize] ^= state[0];
-            whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 2) as usize] ^= state[1];
-            whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 3) as usize] ^= state[2];
-            whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 4) as usize] ^= state[3];
-            whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 5) as usize] ^= state[4];
-            whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 6) as usize] ^= state[5];
-            whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 7) as usize] ^= state[6];
-            whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 8) as usize] ^= state[7];
-            whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 9) as usize] ^= state[8];
-            whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 10) as usize] ^= state[9];
-            whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 11) as usize] ^= state[10];
+            whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 0) as usize] ^= state[11];
+            whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 1) as usize] ^= state[0];
+            whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 2) as usize] ^= state[1];
+            whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 3) as usize] ^= state[2];
+            whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 4) as usize] ^= state[3];
+            whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 5) as usize] ^= state[4];
+            whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 6) as usize] ^= state[5];
+            whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 7) as usize] ^= state[6];
+            whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 8) as usize] ^= state[7];
+            whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 9) as usize] ^= state[8];
+            whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 10) as usize] ^= state[9];
+            whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 11) as usize] ^= state[10];
         }
 
         //updates the value of row* (deterministically picked during Setup))
-        rowa = (rowa + step as u64) & (window - 1);
+        rowa = (rowa + step) & (window - 1);
         //update prev: it now points to the last row ever computed
         prev = row;
         //updates row: goes to the next row to be computed
@@ -493,7 +493,7 @@ pub fn lyra2(
 
         //Checks if all rows in the window where visited.
         if rowa == 0 {
-            step = (window as i32 + gap) as i32; //changes the step: approximately doubles its value
+            step = window + gap; //changes the step: approximately doubles its value
             window *= 2; //doubles the size of the re-visitation window
             gap = -gap; //inverts the modifier to the step
         }
@@ -504,7 +504,7 @@ pub fn lyra2(
     row = 0; //Resets the visitation to the first row of the memory matrix
     for _tau in 1..=time_cost {
         //Step is approximately half the number of all rows of the memory matrix for an odd _tau; otherwise, it is -1
-        step = n_rows as i32 / 2 - 1;
+        step = n_rows as i64 / 2 - 1;
         if _tau % 2 == 0 {
             step = -1;
         }
@@ -514,94 +514,93 @@ pub fn lyra2(
             //Selects a pseudorandom index row*
             //------------------------------------------------------------------------------------------
             //rowa = ((unsigned int)state[0]) & (n_rows-1);	//(USE THIS IF n_rows IS A POWER OF 2)
-            rowa = state[0] % n_rows as u64; //(USE THIS FOR THE "GENERIC" CASE)
+            rowa = (state[0] % n_rows) as i64; //(USE THIS FOR THE "GENERIC" CASE)
             //------------------------------------------------------------------------------------------
 
             //Performs a reduced-round duplexing operation over M[row*] XOR M[prev], updating both M[row*] and M[row]
             //reducedDuplexRow(state, memMatrix[prev], memMatrix[rowa], memMatrix[row], n_cols)
             for _i in 0..n_cols {
-                state[0] ^= whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 0) as usize]
+                state[0] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 0) as usize]
                     .wrapping_add(
-                        whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 0) as usize],
+                        whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 0) as usize],
                     );
-                state[1] ^= whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 1) as usize]
+                state[1] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 1) as usize]
                     .wrapping_add(
-                        whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 1) as usize],
+                        whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 1) as usize],
                     );
-                state[2] ^= whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 2) as usize]
+                state[2] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 2) as usize]
                     .wrapping_add(
-                        whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 2) as usize],
+                        whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 2) as usize],
                     );
-                state[3] ^= whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 3) as usize]
+                state[3] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 3) as usize]
                     .wrapping_add(
-                        whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 3) as usize],
+                        whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 3) as usize],
                     );
-                state[4] ^= whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 4) as usize]
+                state[4] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 4) as usize]
                     .wrapping_add(
-                        whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 4) as usize],
+                        whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 4) as usize],
                     );
-                state[5] ^= whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 5) as usize]
+                state[5] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 5) as usize]
                     .wrapping_add(
-                        whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 5) as usize],
+                        whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 5) as usize],
                     );
-                state[6] ^= whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 6) as usize]
+                state[6] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 6) as usize]
                     .wrapping_add(
-                        whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 6) as usize],
+                        whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 6) as usize],
                     );
-                state[7] ^= whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 7) as usize]
+                state[7] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 7) as usize]
                     .wrapping_add(
-                        whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 7) as usize],
+                        whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 7) as usize],
                     );
-                state[8] ^= whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 8) as usize]
+                state[8] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 8) as usize]
                     .wrapping_add(
-                        whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 8) as usize],
+                        whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 8) as usize],
                     );
-                state[9] ^= whole_matrix[(_i * BLOCKLENINT64 + prev * row_len_int64 + 9) as usize]
+                state[9] ^= whole_matrix[(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 9) as usize]
                     .wrapping_add(
-                        whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 9) as usize],
+                        whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 9) as usize],
                     );
                 state[10] ^= whole_matrix
-                    [(_i * BLOCKLENINT64 + prev * row_len_int64 + 10) as usize]
+                    [(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 10) as usize]
                     .wrapping_add(
-                        whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 10) as usize],
+                        whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 10) as usize],
                     );
                 state[11] ^= whole_matrix
-                    [(_i * BLOCKLENINT64 + prev * row_len_int64 + 11) as usize]
+                    [(_i as i64 * BLOCKLENINT64 + prev * row_len_int64 + 11) as usize]
                     .wrapping_add(
-                        whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 11) as usize],
+                        whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 11) as usize],
                     );
 
                 //Applies the reduced-round transformation f to the sponge's state
                 state = reduced_blake2b_lyra(state);
 
                 //M[rowOut][col] = M[rowOut][col] XOR rand
-                whole_matrix[(_i * BLOCKLENINT64 + row * row_len_int64 + 0) as usize] ^= state[0];
-                whole_matrix[(_i * BLOCKLENINT64 + row * row_len_int64 + 1) as usize] ^= state[1];
-                whole_matrix[(_i * BLOCKLENINT64 + row * row_len_int64 + 2) as usize] ^= state[2];
-                whole_matrix[(_i * BLOCKLENINT64 + row * row_len_int64 + 3) as usize] ^= state[3];
-                whole_matrix[(_i * BLOCKLENINT64 + row * row_len_int64 + 4) as usize] ^= state[4];
-                whole_matrix[(_i * BLOCKLENINT64 + row * row_len_int64 + 5) as usize] ^= state[5];
-                whole_matrix[(_i * BLOCKLENINT64 + row * row_len_int64 + 6) as usize] ^= state[6];
-                whole_matrix[(_i * BLOCKLENINT64 + row * row_len_int64 + 7) as usize] ^= state[7];
-                whole_matrix[(_i * BLOCKLENINT64 + row * row_len_int64 + 8) as usize] ^= state[8];
-                whole_matrix[(_i * BLOCKLENINT64 + row * row_len_int64 + 9) as usize] ^= state[9];
-                whole_matrix[(_i * BLOCKLENINT64 + row * row_len_int64 + 10) as usize] ^= state[10];
-                whole_matrix[(_i * BLOCKLENINT64 + row * row_len_int64 + 11) as usize] ^= state[11];
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + row * row_len_int64 + 0) as usize] ^= state[0];
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + row * row_len_int64 + 1) as usize] ^= state[1];
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + row * row_len_int64 + 2) as usize] ^= state[2];
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + row * row_len_int64 + 3) as usize] ^= state[3];
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + row * row_len_int64 + 4) as usize] ^= state[4];
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + row * row_len_int64 + 5) as usize] ^= state[5];
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + row * row_len_int64 + 6) as usize] ^= state[6];
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + row * row_len_int64 + 7) as usize] ^= state[7];
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + row * row_len_int64 + 8) as usize] ^= state[8];
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + row * row_len_int64 + 9) as usize] ^= state[9];
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + row * row_len_int64 + 10) as usize] ^= state[10];
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + row * row_len_int64 + 11) as usize] ^= state[11];
 
                 //M[rowInOut][col] = M[rowInOut][col] XOR rotW(rand)
-                whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 0) as usize] ^= state[11];
-                whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 1) as usize] ^= state[0];
-                whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 2) as usize] ^= state[1];
-                whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 3) as usize] ^= state[2];
-                whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 4) as usize] ^= state[3];
-                whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 5) as usize] ^= state[4];
-                whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 6) as usize] ^= state[5];
-                whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 7) as usize] ^= state[6];
-                whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 8) as usize] ^= state[7];
-                whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 9) as usize] ^= state[8];
-                whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 10) as usize] ^= state[9];
-                whole_matrix[(_i * BLOCKLENINT64 + rowa * row_len_int64 + 11) as usize] ^=
-                    state[10];
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 0) as usize] ^= state[11];
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 1) as usize] ^= state[0];
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 2) as usize] ^= state[1];
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 3) as usize] ^= state[2];
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 4) as usize] ^= state[3];
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 5) as usize] ^= state[4];
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 6) as usize] ^= state[5];
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 7) as usize] ^= state[6];
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 8) as usize] ^= state[7];
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 9) as usize] ^= state[8];
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 10) as usize] ^= state[9];
+                whole_matrix[(_i as i64 * BLOCKLENINT64 + rowa * row_len_int64 + 11) as usize] ^= state[10];
             }
 
             //update prev: it now points to the last row ever computed
@@ -610,7 +609,7 @@ pub fn lyra2(
             //updates row: goes to the next row to be computed
             //------------------------------------------------------------------------------------------
             //row = (row + step) & (n_rows-1);	//(USE THIS IF n_rows IS A POWER OF 2)
-            row = (row as i32 + step) as u64 % n_rows; //(USE THIS FOR THE "GENERIC" CASE)
+            row = (row + step) % n_rows as i64; //(USE THIS FOR THE "GENERIC" CASE)
             //------------------------------------------------------------------------------------------
             if row == 0 {
                 row0 = true;
