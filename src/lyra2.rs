@@ -509,8 +509,7 @@ pub fn lyra2(
             step = -1;
         }
 
-        let mut row0: bool = false;
-        while !row0 {
+        loop {
             //Selects a pseudorandom index row*
             //------------------------------------------------------------------------------------------
             //rowa = ((unsigned int)state[0]) & (n_rows-1);	//(USE THIS IF n_rows IS A POWER OF 2)
@@ -612,7 +611,7 @@ pub fn lyra2(
             row = (row + step) % n_rows as i64; //(USE THIS FOR THE "GENERIC" CASE)
             //------------------------------------------------------------------------------------------
             if row == 0 {
-                row0 = true;
+                break;
             }
         }
     }
