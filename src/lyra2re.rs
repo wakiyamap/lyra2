@@ -1,3 +1,6 @@
+//! # lyra2re
+//!
+//! `lyra2re` crate has necessary formulas to calculate `lyra2re`.
 use crate::lyra2;
 use blake_hash::Blake256;
 use digest::generic_array::typenum::U32;
@@ -5,6 +8,20 @@ use groestl::Groestl256;
 use sha3::Keccak256;
 use skein_hash::Digest;
 
+/// Returns the calculation result of lyra2re.
+/// # Examples
+///
+/// ```
+/// let base1 = "abc".as_bytes().to_vec();
+/// let lyra2re_result1 = lyra2::lyra2re::sum(base1);
+/// assert_eq!(
+///     "07d3fe93103f6ad4284ad389d4b0a80334c94f5ffd0a537dfc935b3625552317",
+///     lyra2re_result1
+///         .iter()
+///         .map(|n| format!("{:02x}", n))
+///         .collect::<String>()
+/// );
+/// ```
 pub fn sum(input: Vec<u8>) -> Vec<u8> {
     let mut blake256 = Blake256::new();
     blake256.input(input);

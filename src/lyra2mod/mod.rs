@@ -227,6 +227,12 @@ pub fn lyra2mod(
     n_rows: u64,
     n_cols: u64,
 ) -> Vec<u8> {
+    //============================= parameter check ============================//
+    if time_cost != 1 {panic!()};
+    if n_rows > 8 {panic!()};
+    if n_cols > 8 {panic!()};
+    //==========================================================================/
+
     //============================= Basic variables ============================//
     let mut row: i64 = 2; //index of row to be processed
     let mut prev: i64 = 1; //index of prev (last row ever computed/modified)

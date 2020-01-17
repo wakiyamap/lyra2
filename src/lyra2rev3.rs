@@ -1,9 +1,26 @@
+//! # lyra2rev3
+//!
+//! `lyra2rev3` crate has necessary formulas to calculate `lyra2rev3`. For vertcoin etc...
 use crate::bmw;
 use crate::cubehash;
 use crate::lyra2mod;
 use blake_hash::Blake256;
 use skein_hash::Digest;
 
+/// Returns the calculation result of lyra2rev3.
+/// # Examples
+///
+/// ```
+/// let base1 = "abc".as_bytes().to_vec();
+/// let lyra2rev3_result1 = lyra2::lyra2rev3::sum(base1);
+/// assert_eq!(
+///     "4e445087e28d294b3074e98fee860fb73d248a63150ea2d42bfeddd21c0b89ef",
+///     lyra2rev3_result1
+///         .iter()
+///         .map(|n| format!("{:02x}", n))
+///         .collect::<String>()
+/// );
+/// ```
 pub fn sum(input: Vec<u8>) -> Vec<u8> {
     let mut blake256 = Blake256::new();
     blake256.input(input);

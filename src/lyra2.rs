@@ -1,3 +1,6 @@
+//! # lyra2
+//!
+//! `lyra2` crate has necessary formulas to calculate `lyra2`.
 use byteorder::{ByteOrder, LittleEndian};
 
 const BLAKE2BIV: [u64; 8] = [
@@ -219,6 +222,26 @@ fn absorb_block_blake2_safe(mut s: [u64; 16], w: Vec<u64>) -> [u64; 16] {
 // @param time_cost Parameter to determine the processing time (T)
 // @param n_rows Number or rows of the memory matrix (R)
 // @param n_cols Number of columns of the memory matrix (C)
+/// Returns the calculation result of lyra2(advanced).
+/// # Examples
+///
+/// ```
+/// let base1 = "abc".as_bytes().to_vec();
+/// let base2 = base1.clone();
+/// let lyra2_result1 = lyra2::lyra2::lyra2(32, base1, base2, 1, 4, 4);
+/// assert_eq!(
+///     "8f63758bd178f014ea3fd4df09ff0a61646dc574a0b6bcf2890ec529a6a7360c",
+///     lyra2_result1
+///         .iter()
+///         .map(|n| format!("{:02x}", n))
+///         .collect::<String>()
+/// );
+/// ```
+///
+/// # Panics
+///
+/// `time_cost` != 1, `n_rows` > 8, `n_cols` > 8
+///
 pub fn lyra2(
     k: u64,
     pwd: Vec<u8>,
@@ -227,6 +250,12 @@ pub fn lyra2(
     n_rows: u64,
     n_cols: u64,
 ) -> Vec<u8> {
+    //============================= parameter check ============================//
+    if time_cost != 1 {panic!()};
+    if n_rows > 8 {panic!()};
+    if n_cols > 8 {panic!()};
+    //==========================================================================/
+
     //============================= Basic variables ============================//
     let mut row: i64 = 2; //index of row to be processed
     let mut prev: i64 = 1; //index of prev (last row ever computed/modified)
@@ -624,6 +653,20 @@ pub fn lyra2(
     //==========================================================================/
 }
 
+/// Returns the calculation result of lyra2.
+/// # Examples
+///
+/// ```
+/// let base1 = "abc".as_bytes().to_vec();
+/// let lyra2_result1 = lyra2::lyra2::sum(base1);
+/// assert_eq!(
+///     "8f63758bd178f014ea3fd4df09ff0a61646dc574a0b6bcf2890ec529a6a7360c",
+///     lyra2_result1
+///         .iter()
+///         .map(|n| format!("{:02x}", n))
+///         .collect::<String>()
+/// );
+/// ```
 pub fn sum(input: Vec<u8>) -> Vec<u8> {
     let input2 = input.clone();
     lyra2(32, input, input2, 1, 4, 4)

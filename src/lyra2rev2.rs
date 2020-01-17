@@ -1,3 +1,6 @@
+//! # lyra2rev2
+//!
+//! `lyra2rev2` crate has necessary formulas to calculate `lyra2rev2`. For monacoin etc...
 use crate::bmw;
 use crate::cubehash;
 use crate::lyra2;
@@ -6,6 +9,20 @@ use digest::generic_array::typenum::U32;
 use sha3::Keccak256;
 use skein_hash::Digest;
 
+/// Returns the calculation result of lyra2rev2.
+/// # Examples
+///
+/// ```
+/// let base1 = "abc".as_bytes().to_vec();
+/// let lyra2rev2_result1 = lyra2::lyra2rev2::sum(base1);
+/// assert_eq!(
+///     "80ec5344227c5d0bfd63038f00c3fe5aecddd1a1122043b0a90b5fd67b1e8f32",
+///     lyra2rev2_result1
+///         .iter()
+///         .map(|n| format!("{:02x}", n))
+///         .collect::<String>()
+/// );
+/// ```
 pub fn sum(input: Vec<u8>) -> Vec<u8> {
     let mut blake256 = Blake256::new();
     blake256.input(input);
