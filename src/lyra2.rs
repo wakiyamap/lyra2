@@ -219,8 +219,6 @@ fn absorb_block_blake2_safe(mut s: [u64; 16], w: Vec<u64>) -> [u64; 16] {
 // @param time_cost Parameter to determine the processing time (T)
 // @param n_rows Number or rows of the memory matrix (R)
 // @param n_cols Number of columns of the memory matrix (C)
-//
-// @return 0 if the key is generated correctly; -1 if there is an error (usually due to lack of memory for allocation)
 pub fn lyra2(
     k: u64,
     pwd: Vec<u8>,
