@@ -539,7 +539,7 @@ pub fn lyra2(
             //Selects a pseudorandom index row*
             //------------------------------------------------------------------------------------------
             //rowa = ((unsigned int)state[0]) & (n_rows-1);	//(USE THIS IF n_rows IS A POWER OF 2)
-            rowa = (state[0] % n_rows) as i64; //(USE THIS FOR THE "GENERIC" CASE)
+            rowa = (state[0] & (n_rows - 1)) as i64; //(USE THIS FOR THE "GENERIC" CASE)
             //------------------------------------------------------------------------------------------
 
             //Performs a reduced-round duplexing operation over M[row*] XOR M[prev], updating both M[row*] and M[row]

@@ -517,8 +517,8 @@ pub fn lyra2mod(
             //Selects a pseudorandom index row*
             //------------------------------------------------------------------------------------------
             //rowa = ((unsigned int)state[0]) & (n_rows-1);	//(USE THIS IF n_rows IS A POWER OF 2)
-            index = state[index as usize % 16];
-            rowa = (state[index as usize % 16] % n_rows) as i64; //(USE THIS FOR THE "GENERIC" CASE)
+            index = state[index as usize & 0xf];
+            rowa = (state[index as usize & 0xf] & (n_rows - 1)) as i64; //(USE THIS FOR THE "GENERIC" CASE)
             //------------------------------------------------------------------------------------------
 
             //Performs a reduced-round duplexing operation over M[row*] XOR M[prev], updating both M[row*] and M[row]
@@ -651,7 +651,7 @@ fn lyra2mod_hash_cal() {
     let base3 = "脇山珠美ちゃんかわいい！".as_bytes().to_vec();
     let base4 = base3.clone();
     let lyra2mod_result2 = lyra2mod(48, base3, base4, 1, 3, 4);
-    assert_eq!("2cf894c98c024031908621495e71949bf23c77e307ae03f79a19a239f1be6e8443ab4356f44dce0ef30d86a6dafd8962", lyra2mod_result2.iter().map(|n| format!("{:02x}", n)).collect::<String>());
+    assert_eq!("c937cfe0ee21a8e7c1d1871245ea717457edbee2de8bf544e50f807349a3460c52cb6bb10bd0b7328504bc2ad984e1f3", lyra2mod_result2.iter().map(|n| format!("{:02x}", n)).collect::<String>());
 
     let base5 = "😀😁😂".as_bytes().to_vec();
     let base6 = base5.clone();
