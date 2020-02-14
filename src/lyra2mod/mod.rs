@@ -228,9 +228,8 @@ pub fn lyra2mod(
     n_cols: u64,
 ) -> Vec<u8> {
     //============================= parameter check ============================//
-    if time_cost != 1 {panic!()};
-    if n_rows > 8 {panic!()};
-    if n_cols > 8 {panic!()};
+    if time_cost < 1 {panic!()};
+    if n_rows < 3 {panic!()};
     //==========================================================================/
 
     //============================= Basic variables ============================//
@@ -614,7 +613,7 @@ pub fn lyra2mod(
             //updates row: goes to the next row to be computed
             //------------------------------------------------------------------------------------------
             //row = (row + step) & (n_rows-1);	//(USE THIS IF n_rows IS A POWER OF 2)
-            row = (row + step) % n_rows as i64; //(USE THIS FOR THE "GENERIC" CASE)
+            row = (row + step) & (n_rows as i64 -1); //(USE THIS FOR THE "GENERIC" CASE)
             //------------------------------------------------------------------------------------------
             if row == 0 {
                 break;
