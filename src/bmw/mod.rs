@@ -982,10 +982,10 @@ fn bmw_hash_cal() {
             .collect::<String>()
     );
 
-    let base2 = "脇山珠美ちゃん可愛い！".as_bytes().to_vec();
+    let base2 = "脇山珠美ちゃんかわいい！".as_bytes().to_vec();
     let bmw_result2 = sum(base2);
     assert_eq!(
-        "9e1f70ca841421dc44589b1ddafa8f81a5248da3c9458660a53c8f4c7b7ad09b",
+        "034c3defeb35b38e23136ad700885007c0c051cd51cc45170cbbdcd68419214a",
         bmw_result2
             .iter()
             .map(|n| format!("{:02x}", n))

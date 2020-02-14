@@ -55,10 +55,10 @@ fn lyra2rev2_hash_cal() {
             .collect::<String>()
     );
 
-    let base2 = "脇山珠美ちゃん可愛い！".as_bytes().to_vec();
+    let base2 = "脇山珠美ちゃんかわいい！".as_bytes().to_vec();
     let lyra2rev2_result2 = sum(base2);
     assert_eq!(
-        "d355b36923e5db0a035cca09c3ca6aab1081a4fc95ddc8210e11552aa64440b6",
+        "bdaaa569c4f4918da66b02f2d0a2093a51e3d1735ee6023e9a93185c7bff40bc",
         lyra2rev2_result2
             .iter()
             .map(|n| format!("{:02x}", n))

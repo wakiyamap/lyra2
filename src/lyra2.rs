@@ -683,10 +683,10 @@ fn lyra2_hash_cal() {
             .collect::<String>()
     );
 
-    let base3 = "脇山珠美ちゃん可愛い！".as_bytes().to_vec();
+    let base3 = "脇山珠美ちゃんかわいい！".as_bytes().to_vec();
     let base4 = base3.clone();
     let lyra2_result2 = lyra2(48, base3, base4, 1, 3, 4);
-    assert_eq!("1bd5e9731a0f6475b3c2add5358f0d1eeac66f3f5d5b4d2346fbae196757a6e00193671974128a18af696313f07310b7", lyra2_result2.iter().map(|n| format!("{:02x}", n)).collect::<String>());
+    assert_eq!("c937cfe0ee21a8e7c1d1871245ea717457edbee2de8bf544e50f807349a3460c52cb6bb10bd0b7328504bc2ad984e1f3", lyra2_result2.iter().map(|n| format!("{:02x}", n)).collect::<String>());
 
     let base5 = "😀😁😂".as_bytes().to_vec();
     let base6 = base5.clone();
