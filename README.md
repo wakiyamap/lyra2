@@ -1,10 +1,16 @@
 lyra2
 ====
+
+![Rust](https://github.com/wakiyamap/lyra2/workflows/Rust/badge.svg)
+
 ## Description
 Pure rust library in Lyra2, Lyra2RE, Lyra2REv2, Lyra2REv3.
 
 The following golang libraries have been rewritten in Rust.
 https://github.com/bitgoin/lyra2rev2
+
+## Minimal rust version
+1.32+
 
 ## Example
 ```
