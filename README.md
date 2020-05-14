@@ -1,7 +1,7 @@
 lyra2
 ====
 
-![Rust](https://github.com/wakiyamap/lyra2/workflows/Rust/badge.svg)
+[![Rust](https://github.com/wakiyamap/lyra2/workflows/Rust/badge.svg)](https://github.com/wakiyamap/lyra2/actions)
 
 ## Description
 Pure rust library in Lyra2, Lyra2RE, Lyra2REv2, Lyra2REv3.
