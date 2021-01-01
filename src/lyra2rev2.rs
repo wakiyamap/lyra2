@@ -4,8 +4,8 @@
 use crate::bmw;
 use crate::cubehash;
 use crate::lyra2;
-use blake_hash::Digest as blakeDigest;
 use digest::generic_array::typenum::U32;
+use blake_hash::Digest as blakeDigest;
 use sha3::Keccak256;
 use skein_hash::Digest;
 

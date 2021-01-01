@@ -2,9 +2,9 @@
 //!
 //! `lyra2re` crate has necessary formulas to calculate `lyra2re`.
 use crate::lyra2;
-use blake_hash::Digest as blakeDigest;
 use digest::generic_array::typenum::U32;
-use groestl::Groestl256;
+use blake_hash::Digest as blakeDigest;
+use groestl;
 use sha3::Keccak256;
 use skein_hash::Digest;
 
@@ -35,11 +35,9 @@ pub fn sum(input: Vec<u8>) -> Vec<u8> {
 
     let result_skein = skein_hash::Skein512::<U32>::digest(&result_lyra2);
 
-    let mut groestl = Groestl256::new();
-    groestl.input(result_skein);
-    let result_groestl256 = groestl.result();
+    let result_groestl256 = groestl::Groestl256::digest(&result_skein).to_vec();
 
-    result_groestl256.to_vec()
+    result_groestl256
 }
 
 #[test]
