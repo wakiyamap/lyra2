@@ -33,9 +33,7 @@ pub fn sum(input: Vec<u8>) -> Vec<u8> {
 
     let result_skein = skein_hash::Skein512::<U32>::digest(&result_lyra2);
 
-    let result_groestl256 = groestl::Groestl256::digest(&result_skein).to_vec();
-
-    result_groestl256
+    groestl::Groestl256::digest(&result_skein).to_vec()
 }
 
 #[test]
