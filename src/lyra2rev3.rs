@@ -4,8 +4,7 @@
 use crate::bmw;
 use crate::cubehash;
 use crate::lyra2mod;
-use blake_hash::Blake256;
-use skein_hash::Digest;
+use blake_hash::Digest;
 
 /// Returns the calculation result of lyra2rev3.
 /// # Examples
@@ -22,9 +21,7 @@ use skein_hash::Digest;
 /// );
 /// ```
 pub fn sum(input: Vec<u8>) -> Vec<u8> {
-    let mut blake256 = Blake256::new();
-    blake256.input(input);
-    let result_blake = blake256.result().to_vec();
+    let result_blake = blake_hash::Blake256::digest(&input).to_vec();
 
     let result_lyra2_mod_1 = lyra2mod::sum(result_blake);
 

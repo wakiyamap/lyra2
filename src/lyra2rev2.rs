@@ -4,7 +4,7 @@
 use crate::bmw;
 use crate::cubehash;
 use crate::lyra2;
-use blake_hash::Blake256;
+use blake_hash::Digest as blakeDigest;
 use digest::generic_array::typenum::U32;
 use sha3::Keccak256;
 use skein_hash::Digest;
@@ -24,9 +24,7 @@ use skein_hash::Digest;
 /// );
 /// ```
 pub fn sum(input: Vec<u8>) -> Vec<u8> {
-    let mut blake256 = Blake256::new();
-    blake256.input(input);
-    let result_blake = blake256.result();
+    let result_blake = blake_hash::Blake256::digest(&input).to_vec();
 
     let mut keccak256 = Keccak256::new();
     keccak256.input(result_blake);

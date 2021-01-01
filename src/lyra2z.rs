@@ -2,8 +2,7 @@
 //!
 //! `lyra2z` crate has necessary formulas to calculate `lyra2z`.
 use crate::lyra2;
-use blake_hash::Blake256;
-use skein_hash::Digest;
+use blake_hash::Digest;
 
 /// Returns the calculation result of lyra2z.
 /// # Examples
@@ -20,9 +19,7 @@ use skein_hash::Digest;
 /// );
 /// ```
 pub fn sum(input: Vec<u8>) -> Vec<u8> {
-    let mut blake256 = Blake256::new();
-    blake256.input(input);
-    let result_blake_1 = blake256.result().to_vec();
+    let result_blake_1 = blake_hash::Blake256::digest(&input).to_vec();
 
     let result_blake_2 = result_blake_1.clone();
 
