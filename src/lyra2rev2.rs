@@ -6,7 +6,7 @@ use crate::cubehash;
 use crate::lyra2;
 use digest::generic_array::typenum::U32;
 use blake_hash::Digest as blakeDigest;
-use sha3::Keccak256;
+use sha3;
 use skein_hash::Digest;
 
 /// Returns the calculation result of lyra2rev2.
@@ -26,9 +26,7 @@ use skein_hash::Digest;
 pub fn sum(input: Vec<u8>) -> Vec<u8> {
     let result_blake = blake_hash::Blake256::digest(&input).to_vec();
 
-    let mut keccak256 = Keccak256::new();
-    keccak256.input(result_blake);
-    let result_keccak256 = keccak256.result();
+    let result_keccak256 = sha3::Keccak256::digest(&result_blake);
 
     let result_cube = cubehash::sum(result_keccak256.to_vec());
 
