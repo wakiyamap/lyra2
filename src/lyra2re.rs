@@ -3,8 +3,7 @@
 //! `lyra2re` crate has necessary formulas to calculate `lyra2re`.
 use crate::lyra2;
 use digest::generic_array::typenum::U32;
-use blake_hash::Digest as blakeDigest;
-use skein_hash::Digest;
+use blake_hash::Digest;
 
 /// Returns the calculation result of lyra2re.
 /// # Examples
