@@ -891,7 +891,7 @@ fn compress(mut b: Bmw, m: [u32; 16]) -> Bmw {
     h[1] = ((xh >> 7) ^ (q[17] << 8) ^ m[1]).wrapping_add(xl ^ q[25] ^ q[1]);
     h[2] = ((xh >> 5) ^ (q[18] << 5) ^ m[2]).wrapping_add(xl ^ q[26] ^ q[2]);
     h[3] = ((xh >> 1) ^ (q[19] << 5) ^ m[3]).wrapping_add(xl ^ q[27] ^ q[3]);
-    h[4] = ((xh >> 3) ^ (q[20] << 0) ^ m[4]).wrapping_add(xl ^ q[28] ^ q[4]);
+    h[4] = ((xh >> 3) ^ q[20] ^ m[4]).wrapping_add(xl ^ q[28] ^ q[4]);
     h[5] = ((xh << 6) ^ (q[21] >> 6) ^ m[5]).wrapping_add(xl ^ q[29] ^ q[5]);
     h[6] = ((xh >> 4) ^ (q[22] << 6) ^ m[6]).wrapping_add(xl ^ q[30] ^ q[6]);
     h[7] = ((xh >> 11) ^ (q[23] << 2) ^ m[7]).wrapping_add(xl ^ q[31] ^ q[7]);
