@@ -89,7 +89,7 @@ fn parse_hex(hex_asm: &str) -> Vec<u8> {
 In order to use this crate, you have to add it under ``[dependencies]`` to your ``Cargo.toml``
 ```
 [dependencies]
-lyra2 = "0.2.3"
+lyra2 = "0.2.4"
 ```
 
 ## Licence
