@@ -116,7 +116,9 @@ dependencies = [
 
 [[package]]
 name = "skein-hash"
-version = "0.3.0"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5726f8a6133ac5f2fc62f3b0f132e85341623e9a7d3740d1092f15a1fa5d2a62"
 dependencies = [
  "block-buffer",
  "digest",
