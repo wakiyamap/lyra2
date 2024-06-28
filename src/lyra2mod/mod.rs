@@ -248,7 +248,7 @@ pub fn lyra2mod(
 
     let row_len_int64: i64 = BLOCKLENINT64 * n_cols as i64;
     let mut _i: i64 = n_rows as i64 * row_len_int64;
-    let mut whole_matrix: Vec<u64> = Vec::new();
+    let mut whole_matrix: Vec<u64> = vec![0; _i as usize];
     whole_matrix.resize(_i as usize, 0);
 
     //==========================================================================/

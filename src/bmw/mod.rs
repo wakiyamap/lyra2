@@ -936,7 +936,7 @@ pub fn sum(input: Vec<u8>) -> Vec<u8> {
             buf.push(0);
         }
     }
-    buf[input.len() as usize] = 0x80;
+    buf[input.len()] = 0x80;
     let bit_len = ((input.len() as u64) << 3).to_le_bytes();
     buf[56] = bit_len[0];
     buf[57] = bit_len[1];
