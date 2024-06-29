@@ -1,5 +1,3 @@
-use byteorder::{ByteOrder, LittleEndian};
-
 const IV: [u32; 32] = [
     0xEA2B_D4B4,
     0xCCD6_F29F,
@@ -107,23 +105,22 @@ fn new_cube_hash() -> CubeHash {
     }
 }
 
+fn read_u32_le(data: &[u8]) -> u32 {
+    (data[0] as u32) |
+    ((data[1] as u32) << 8) |
+    ((data[2] as u32) << 16) |
+    ((data[3] as u32) << 24)
+}
+
 fn input_block(data: Vec<u8>, mut c: CubeHash) -> CubeHash {
-    let (_, mut _right) = &data.split_at(0);
-    c.x0 ^= LittleEndian::read_u32(_right);
-    let (_, mut _right) = &data.split_at(4);
-    c.x1 ^= LittleEndian::read_u32(_right);
-    let (_, mut _right) = &data.split_at(8);
-    c.x2 ^= LittleEndian::read_u32(_right);
-    let (_, mut _right) = &data.split_at(12);
-    c.x3 ^= LittleEndian::read_u32(_right);
-    let (_, mut _right) = &data.split_at(16);
-    c.x4 ^= LittleEndian::read_u32(_right);
-    let (_, mut _right) = &data.split_at(20);
-    c.x5 ^= LittleEndian::read_u32(_right);
-    let (_, mut _right) = &data.split_at(24);
-    c.x6 ^= LittleEndian::read_u32(_right);
-    let (_, mut _right) = &data.split_at(28);
-    c.x7 ^= LittleEndian::read_u32(_right);
+    c.x0 ^= read_u32_le(&data[0..4]);
+    c.x1 ^= read_u32_le(&data[4..8]);
+    c.x2 ^= read_u32_le(&data[8..12]);
+    c.x3 ^= read_u32_le(&data[12..16]);
+    c.x4 ^= read_u32_le(&data[16..20]);
+    c.x5 ^= read_u32_le(&data[20..24]);
+    c.x6 ^= read_u32_le(&data[24..28]);
+    c.x7 ^= read_u32_le(&data[28..32]);
     c
 }
 

@@ -1,7 +1,6 @@
 //! # lyra2
 //!
 //! `lyra2` crate has necessary formulas to calculate `lyra2`.
-use byteorder::{ByteOrder, LittleEndian};
 
 const BLAKE2BIV: [u64; 8] = [
     0x6a09_e667_f3bc_c908,
@@ -210,6 +209,17 @@ fn absorb_block_blake2_safe(mut s: [u64; 16], w: Vec<u64>) -> [u64; 16] {
     s
 }
 
+fn read_u64_le(data: &[u8]) -> u64 {
+    (data[0] as u64) |
+    ((data[1] as u64) << 8) |
+    ((data[2] as u64) << 16) |
+    ((data[3] as u64) << 24) |
+    ((data[4] as u64) << 32) |
+    ((data[5] as u64) << 40) |
+    ((data[6] as u64) << 48) |
+    ((data[7] as u64) << 56)
+}
+
 // lyra2 Executes Lyra2 based on the G function from Blake2b. This version supports salts and passwords
 // whose combined length is smaller than the size of the memory matrix, (i.e., (n_rows x n_cols x b) bits,
 // where "b" is the underlying sponge's bitrate). In this implementation, the "basil" is composed by all
@@ -285,20 +295,20 @@ pub fn lyra2(
         ((salt.len() + pwd.len() + 6 * 8) as i64 / BLOCKLENBLAKE2SAFEBYTES) + 1;
     let mut ptr_byte: usize = 0; // (byte*) whole_matrix;
 
-    //Prepends the password
-    let mut _right = &pwd;
-    for _j in 0..pwd.len() / 8 {
-        let (_, mut _right) = &pwd.split_at(8 * _j);
-        whole_matrix[ptr_byte + _j] = LittleEndian::read_u64(_right);
+    // Prepends the password
+    for j in 0..pwd.len() / 8 {
+        let start = 8 * j;
+        let end = start + 8;
+        whole_matrix[ptr_byte + j] = read_u64_le(&pwd[start..end]);
     }
 
     ptr_byte += (pwd.len() as u64 / 8) as usize;
 
-    //Concatenates the salt
-    let mut _right = &salt;
-    for _j in 0..salt.len() / 8 {
-        let (_, mut _right) = &pwd.split_at(8 * _j);
-        whole_matrix[ptr_byte + _j] = LittleEndian::read_u64(_right);
+    // Concatenates the salt
+    for j in 0..salt.len() / 8 {
+        let start = 8 * j;
+        let end = start + 8;
+        whole_matrix[ptr_byte + j] = read_u64_le(&salt[start..end]);
     }
 
     ptr_byte += (salt.len() as u64 / 8) as usize;

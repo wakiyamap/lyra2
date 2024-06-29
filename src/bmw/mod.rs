@@ -1,5 +1,3 @@
-use byteorder::{ByteOrder, LittleEndian};
-
 const INITVAL: [u32; 16] = [
     0x4041_4243,
     0x4445_4647,
@@ -924,6 +922,14 @@ fn compress(mut b: Bmw, m: [u32; 16]) -> Bmw {
     b
 }
 
+
+fn read_u32_le(data: &[u8]) -> u32 {
+    (data[0] as u32) |
+    ((data[1] as u32) << 8) |
+    ((data[2] as u32) << 16) |
+    ((data[3] as u32) << 24)
+}
+
 //sum calculates bmw256.
 //length of data must be 32 bytes.
 pub fn sum(input: Vec<u8>) -> Vec<u8> {
@@ -948,8 +954,9 @@ pub fn sum(input: Vec<u8>) -> Vec<u8> {
     buf[63] = bit_len[7];
     let mut _i = 0;
     for _i in 0..16 {
-        let (_, mut _right) = &buf.split_at(4 * _i);
-        b.m[_i] = LittleEndian::read_u32(_right);
+        let start = 4 * _i;
+        let end = start + 4;
+        b.m[_i] = read_u32_le(&buf[start..end]);
     }
     let m = b.m;
     let mut b = compress(b, m);
