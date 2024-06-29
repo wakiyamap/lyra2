@@ -10,7 +10,7 @@ The following golang libraries have been rewritten in Rust.
 https://github.com/bitgoin/lyra2rev2
 
 ## Minimal rust version
-1.32+
+1.71+
 
 ## Example
 ```
