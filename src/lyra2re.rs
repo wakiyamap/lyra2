@@ -4,7 +4,7 @@
 use crate::lyra2;
 use digest::generic_array::typenum::U32;
 use blake_hash::Digest as BlakeDigest;
-use groestl::Digest;
+use sha3::Digest;
 
 /// Returns the calculation result of lyra2re.
 /// # Examples
@@ -23,7 +23,7 @@ use groestl::Digest;
 pub fn sum(input: Vec<u8>) -> Vec<u8> {
     let result_blake = blake_hash::Blake256::digest(&input).to_vec();
 
-    let result_keccak256_1 = sha3::Keccak256::digest(&result_blake).to_vec();
+    let result_keccak256_1 = sha3::Keccak256::digest(result_blake).to_vec();
 
     let result_keccak256_2 = result_keccak256_1.clone();
 

@@ -5,7 +5,8 @@ use crate::bmw;
 use crate::cubehash;
 use crate::lyra2;
 use digest::generic_array::typenum::U32;
-use blake_hash::Digest;
+use blake_hash::Digest as BlakeDigest;
+use sha3::Digest;
 
 /// Returns the calculation result of lyra2rev2.
 /// # Examples
@@ -24,7 +25,7 @@ use blake_hash::Digest;
 pub fn sum(input: Vec<u8>) -> Vec<u8> {
     let result_blake = blake_hash::Blake256::digest(&input).to_vec();
 
-    let result_keccak256 = sha3::Keccak256::digest(&result_blake);
+    let result_keccak256 = sha3::Keccak256::digest(result_blake);
 
     let result_cube = cubehash::sum(result_keccak256.to_vec());
 
