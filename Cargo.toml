@@ -15,7 +15,7 @@ keywords = ["lyra2", "Lyra2RE", "Lyra2REv2", "Lyra2REv3"]
 [dependencies]
 sha3 = "0.9.1"
 blake-hash = "0.4.1"
-groestl = "0.9.0"
+groestl = "0.10.1"
 byteorder = { version = "1.3.4", default-features = false }
 skein-hash = "0.3.1"
 digest = "0.9.0"

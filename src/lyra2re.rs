@@ -3,7 +3,8 @@
 //! `lyra2re` crate has necessary formulas to calculate `lyra2re`.
 use crate::lyra2;
 use digest::generic_array::typenum::U32;
-use blake_hash::Digest;
+use blake_hash::Digest as BlakeDigest;
+use groestl::Digest;
 
 /// Returns the calculation result of lyra2re.
 /// # Examples
@@ -30,7 +31,7 @@ pub fn sum(input: Vec<u8>) -> Vec<u8> {
 
     let result_skein = skein_hash::Skein512::<U32>::digest(&result_lyra2);
 
-    groestl::Groestl256::digest(&result_skein).to_vec()
+    groestl::Groestl256::digest(result_skein).to_vec()
 }
 
 #[test]
