@@ -1,3 +1,5 @@
+use crate::utils::read_u32_le;
+
 const INITVAL: [u32; 16] = [
     0x4041_4243,
     0x4445_4647,
@@ -920,14 +922,6 @@ fn compress(mut b: Bmw, m: [u32; 16]) -> Bmw {
     b.h[..16].clone_from_slice(&h[..16]);
     b.q[..32].clone_from_slice(&q[..32]);
     b
-}
-
-
-fn read_u32_le(data: &[u8]) -> u32 {
-    (data[0] as u32) |
-    ((data[1] as u32) << 8) |
-    ((data[2] as u32) << 16) |
-    ((data[3] as u32) << 24)
 }
 
 //sum calculates bmw256.

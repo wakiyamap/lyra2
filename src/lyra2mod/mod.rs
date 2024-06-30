@@ -1,3 +1,5 @@
+use crate::utils::read_u64_le;
+
 const BLAKE2BIV: [u64; 8] = [
     0x6a09_e667_f3bc_c908,
     0xbb67_ae85_84ca_a73b,
@@ -203,17 +205,6 @@ fn absorb_block_blake2_safe(mut s: [u64; 16], w: Vec<u64>) -> [u64; 16] {
     //Applies the transformation f to the sponge's state
     s = blake2b_lyra(s);
     s
-}
-
-fn read_u64_le(data: &[u8]) -> u64 {
-    (data[0] as u64) |
-    ((data[1] as u64) << 8) |
-    ((data[2] as u64) << 16) |
-    ((data[3] as u64) << 24) |
-    ((data[4] as u64) << 32) |
-    ((data[5] as u64) << 40) |
-    ((data[6] as u64) << 48) |
-    ((data[7] as u64) << 56)
 }
 
 // lyra2 Executes Lyra2 based on the G function from Blake2b. This version supports salts and passwords

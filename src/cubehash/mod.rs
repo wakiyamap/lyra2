@@ -1,3 +1,5 @@
+use crate::utils::read_u32_le;
+
 const IV: [u32; 32] = [
     0xEA2B_D4B4,
     0xCCD6_F29F,
@@ -103,13 +105,6 @@ fn new_cube_hash() -> CubeHash {
         xu: IV[30],
         xv: IV[31],
     }
-}
-
-fn read_u32_le(data: &[u8]) -> u32 {
-    (data[0] as u32) |
-    ((data[1] as u32) << 8) |
-    ((data[2] as u32) << 16) |
-    ((data[3] as u32) << 24)
 }
 
 fn input_block(data: Vec<u8>, mut c: CubeHash) -> CubeHash {
