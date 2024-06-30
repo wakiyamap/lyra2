@@ -2,13 +2,14 @@
 name = "lyra2"
 version = "0.2.7"
 authors = ["wakiyamap <wakiyamap@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
-license = "MIT"
+license = "MIT OR Apache-2.0"
 description = "Pure rust library in Lyra2, Lyra2RE, Lyra2REv2, Lyra2REv3."
 repository = "https://github.com/wakiyamap/lyra2"
 readme = "README.md"
 keywords = ["lyra2", "Lyra2RE", "Lyra2REv2", "Lyra2REv3"]
+rust-version = "1.71"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
